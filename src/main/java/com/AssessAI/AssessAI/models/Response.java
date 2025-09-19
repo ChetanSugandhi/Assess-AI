@@ -21,8 +21,8 @@ public class Response {
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name = "teacher_id")
-    private Teacher teacher; // optional: evaluator
+    @JoinColumn(name = "test_id")
+    private Test test; // optional: evaluator
 
     @ManyToOne
     @JoinColumn(name = "question_id")
