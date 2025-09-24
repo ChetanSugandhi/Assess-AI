@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/assignment")
 public class AssignmentController {
@@ -38,9 +40,17 @@ public class AssignmentController {
         return new ResponseEntity<AssignmentDTO>(updateAssignment, HttpStatus.OK);
     }
 
+    // delete assignment
     @DeleteMapping("/{assignmentId}")
     public ResponseEntity<String> deleteAssignment(@PathVariable Long assignmentId) {
         String result = assignmentService.deleteAssignment(assignmentId);
         return new ResponseEntity<String>(result, HttpStatus.OK);
+    }
+
+    // get all assignments of a specific classroom
+    @GetMapping("/classroom/{classroomId}")
+    public ResponseEntity<List<AssignmentDTO>> allAssignments(@PathVariable Long classroomId) {
+        List<AssignmentDTO> allAssignments = assignmentService.getAllAssignmentOfClassroom(classroomId);
+        return new ResponseEntity<List<AssignmentDTO>>(allAssignments, HttpStatus.OK);
     }
 }

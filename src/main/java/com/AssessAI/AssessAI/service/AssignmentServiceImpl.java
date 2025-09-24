@@ -10,7 +10,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class AssignmentServiceImpl implements AssignmentService {
@@ -91,6 +93,22 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .orElseThrow(() -> new RuntimeException("Assignment not found with id: " + id));
         assignmentRepository.delete(assignment);
         return "Assignment deleted successfully";
+    }
+
+    @Override
+    public List<AssignmentDTO> getAllAssignmentOfClassroom(Long classroomId) {
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new RuntimeException("Classroom with classroom id : " + classroomId + " not found..!!"));
+
+        Set<Assignment> fetchAssignment = classroom.getAssignments();
+        List<AssignmentDTO> assignmentDTOS = new ArrayList<>();
+
+        for(Assignment eachAssignment : fetchAssignment) {
+            AssignmentDTO assignmentDTO = modelMapper.map(eachAssignment, AssignmentDTO.class);
+            assignmentDTOS.add(assignmentDTO);
+        }
+
+        return assignmentDTOS;
     }
 
 }

@@ -11,4 +11,6 @@ public interface AssignmentService {
     List<Assignment> getAllAssignments();
     AssignmentDTO updateAssignment(Long id, AssignmentDTO updatedAssignment);
     String deleteAssignment(Long id);
+
+    List<AssignmentDTO> getAllAssignmentOfClassroom(Long classroomId);
 }
