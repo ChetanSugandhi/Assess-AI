@@ -49,6 +49,15 @@ public class ClasssroomController {
     }
 
 
+
+    // teacher specific classrooms
+    @GetMapping("/teacher/{teacherId}")
+    public ResponseEntity<List<ClassroomDTO>> getAllClassroomOfTeacher(@PathVariable Long teacherId) {
+        List<ClassroomDTO> classroomDTOS = classroomService.getAllClassroomsOfTeacherByTeacherId(teacherId);
+        return new ResponseEntity<List<ClassroomDTO>>(classroomDTOS, HttpStatus.FOUND);
+    }
+
+
     @DeleteMapping("/{classroomId}")
     public ResponseEntity<String> deleteClassroomById(@PathVariable Long classroomId) {
         String result = classroomService.deleteClassroom(classroomId);

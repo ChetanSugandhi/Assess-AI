@@ -40,6 +40,7 @@ public class ClassroomServiceImpl implements ClassroomService {
         this.classroomRepository = classroomRepository;
     }
 
+    // save/create classroom
     @Override
     public ClassroomDTO saveClassroom(ClassroomDTO classroomDTO) {
         Classroom classroom = modelMapper.map(classroomDTO, Classroom.class);
@@ -51,6 +52,7 @@ public class ClassroomServiceImpl implements ClassroomService {
         return modelMapper.map(savedClassroom, ClassroomDTO.class);
     }
 
+    // get classroom by id
     @Override
     public ClassroomDTO getClassroomById(Long id) {
         Classroom classroom = classroomRepository.findById(id)
@@ -148,5 +150,23 @@ public class ClassroomServiceImpl implements ClassroomService {
         // classroom ko delete kra toh usse related assignment and assessment bhi delete becuase of cascading..
         classroomRepository.delete(findClassroom);
         return "Successfully deleted classroom..!!";
+    }
+
+    // get all classroom of teacher by teacher Id
+    @Override
+    public List<ClassroomDTO> getAllClassroomsOfTeacherByTeacherId(Long teacherId) {
+        Teacher findTeacher = teacherRepository.findById(teacherId)
+                .orElseThrow(() -> new RuntimeException("Teacher with teacher ID : " + teacherId + " not found..!!"));
+
+        Set<Classroom> fetchClassrooms = findTeacher.getClassrooms();
+
+        List<ClassroomDTO> classroomDTOS = new ArrayList<>();
+
+        for(Classroom eachClassroom : fetchClassrooms) {
+            ClassroomDTO classroomDTO = modelMapper.map(eachClassroom, ClassroomDTO.class);
+            classroomDTOS.add(classroomDTO);
+        }
+
+        return classroomDTOS;
     }
 }

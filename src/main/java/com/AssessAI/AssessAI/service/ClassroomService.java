@@ -10,4 +10,7 @@ public interface ClassroomService {
     List<ClassroomDTO> getAllClassrooms();
     ClassroomDTO updateClassroom(Long id, ClassroomDTO updatedClassroomDTO);
     String deleteClassroom(Long id);
+
+
+    List<ClassroomDTO> getAllClassroomsOfTeacherByTeacherId(Long teacherId);
 }
