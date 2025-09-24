@@ -11,6 +11,9 @@ public interface ClassroomService {
     ClassroomDTO updateClassroom(Long id, ClassroomDTO updatedClassroomDTO);
     String deleteClassroom(Long id);
 
-
+    // get all classrooms of a teacher
     List<ClassroomDTO> getAllClassroomsOfTeacherByTeacherId(Long teacherId);
+
+    // get all classrooms of a student
+    List<ClassroomDTO> getAllClassroomsOfStudentByStudentId(Long studentId);
 }

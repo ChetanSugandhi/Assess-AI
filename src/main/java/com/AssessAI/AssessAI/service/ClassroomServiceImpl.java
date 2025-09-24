@@ -169,4 +169,23 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         return classroomDTOS;
     }
+
+
+    // get all classroom of student by student Id
+    @Override
+    public List<ClassroomDTO> getAllClassroomsOfStudentByStudentId(Long studentId) {
+        Student findStudent = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student with student ID : " + studentId + " not found..!!"));
+
+        Set<Classroom> fetchClassrooms = findStudent.getClassrooms();
+
+        List<ClassroomDTO> classroomDTOS = new ArrayList<>();
+
+        for(Classroom eachClassroom : fetchClassrooms) {
+            ClassroomDTO classroomDTO = modelMapper.map(eachClassroom, ClassroomDTO.class);
+            classroomDTOS.add(classroomDTO);
+        }
+
+        return classroomDTOS;
+    }
 }

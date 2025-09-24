@@ -49,6 +49,13 @@ public class ClasssroomController {
     }
 
 
+    // delete classroom by id
+    @DeleteMapping("/{classroomId}")
+    public ResponseEntity<String> deleteClassroomById(@PathVariable Long classroomId) {
+        String result = classroomService.deleteClassroom(classroomId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 
     // teacher specific classrooms
     @GetMapping("/teacher/{teacherId}")
@@ -58,9 +65,12 @@ public class ClasssroomController {
     }
 
 
-    @DeleteMapping("/{classroomId}")
-    public ResponseEntity<String> deleteClassroomById(@PathVariable Long classroomId) {
-        String result = classroomService.deleteClassroom(classroomId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+
+    // student specific classrooms
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<List<ClassroomDTO>> getAllClassroomOfStudent(@PathVariable Long studentId) {
+        List<ClassroomDTO> classroomDTOS = classroomService.getAllClassroomsOfStudentByStudentId(studentId);
+        return new ResponseEntity<List<ClassroomDTO>>(classroomDTOS, HttpStatus.FOUND);
     }
+
 }
