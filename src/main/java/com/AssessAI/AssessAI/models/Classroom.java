@@ -16,7 +16,7 @@ public class Classroom {
 
     private String className;
     private String subject;
-    private String section;
+    private String classroomCode;
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")
@@ -30,9 +30,9 @@ public class Classroom {
     )
     private Set<Student> students = new HashSet<>();
 
-    @OneToMany(mappedBy = "classroom")
+    @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL)
     private Set<Assignment> assignments = new HashSet<>();
 
-    @OneToMany(mappedBy = "classroom")
+    @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL)
     private Set<Assessment> assessments = new HashSet<>();
 }
