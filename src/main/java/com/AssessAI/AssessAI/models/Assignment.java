@@ -24,9 +24,9 @@ public class Assignment {
     @JoinColumn(name = "classroom_id")
     private Classroom classroom;
 
-    @OneToOne(mappedBy = "assignment")
+    @OneToOne(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
     private Test test;
 
-    @OneToMany(mappedBy = "assignment")
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Result> results = new HashSet<>();
 }

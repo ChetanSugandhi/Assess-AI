@@ -85,10 +85,12 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    public void deleteAssignment(Long id) {
-        if (!assignmentRepository.existsById(id)) {
-            throw new RuntimeException("Assignment not found with id " + id);
-        }
-        assignmentRepository.deleteById(id);
+    @Transactional
+    public String deleteAssignment(Long id) {
+        Assignment assignment = assignmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Assignment not found with id: " + id));
+        assignmentRepository.delete(assignment);
+        return "Assignment deleted successfully";
     }
+
 }

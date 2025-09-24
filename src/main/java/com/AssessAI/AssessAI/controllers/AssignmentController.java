@@ -37,4 +37,10 @@ public class AssignmentController {
         AssignmentDTO updateAssignment = assignmentService.updateAssignment(assignmentId, assignmentDTO);
         return new ResponseEntity<AssignmentDTO>(updateAssignment, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{assignmentId}")
+    public ResponseEntity<String> deleteAssignment(@PathVariable Long assignmentId) {
+        String result = assignmentService.deleteAssignment(assignmentId);
+        return new ResponseEntity<String>(result, HttpStatus.OK);
+    }
 }
