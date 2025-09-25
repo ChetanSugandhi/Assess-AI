@@ -188,4 +188,75 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         return classroomDTOS;
     }
+
+
+    // join classroom with classroom code....
+    @Override
+    public String joinClassroomByClassroomCode(String classroomCode) {
+        Student currLoggedInStudent = authUtil.getLoggedInUser();
+
+        Classroom fetchClassroom = classroomRepository.findByClassroomCode(classroomCode)
+                .orElseThrow(() -> new RuntimeException("Classroom with classroom code : " + classroomCode + " not found..!!"));
+
+        if(fetchClassroom.getStudents().contains(currLoggedInStudent)) {
+            return "You are already in this classroom..!!";
+        }
+
+        fetchClassroom.getStudents().add(currLoggedInStudent);
+        currLoggedInStudent.getClassrooms().add(fetchClassroom);
+
+        classroomRepository.save(fetchClassroom);
+        studentRepository.save(currLoggedInStudent);
+
+        return "Successfully joined classroom with code: " + classroomCode;
+
+        return "";
+    }
+
+
+    // remove student from classroom
+    @Override
+    @Transactional
+    public String removeStudentFromClassroom(Long classroomId, Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with student Id : " + studentId));
+
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new RuntimeException("Classroom with classroom Id not found : " + classroomId));
+
+        if (!classroom.getStudents().contains(student)) {
+            throw new RuntimeException("Student is not part of this classroom.");
+        }
+
+        student.getClassrooms().remove(classroom);
+        classroom.getStudents().remove(student);
+
+        classroomRepository.save(classroom);
+        studentRepository.save(student);
+
+        return "Student with ID " + studentId + " removed successfully from Classroom " + classroomId;
+    }
+
+
+    // fetch all the assignments of the classroom by classroom code
+    @Override
+    public List<AssignmentDTO> getAllAssignmentOfClassroom(String classroomCode) {
+        Classroom fetchClassroom = classroomRepository.findByClassroomCode(classroomCode)
+                .orElseThrow(() -> new RuntimeException("Classroom with classroom code not found..!!" + classroomCode));
+
+        List<AssignmentDTO> assignmentDTOS = new ArrayList<>();
+        Set<Assignment> allAssignment = fetchClassroom.getAssignments();
+        if(allAssignment.isEmpty()) {
+            throw new RuntimeException("There is no assignment, add assignments to continue...");
+        }
+
+        for(Assignment eachAssignment : allAssignment) {
+            AssignmentDTO assignmentDTO = modelMapper.map(eachAssignment, AssignmentDTO.class);
+            assignmentDTOS.add(assignmentDTO);
+        }
+
+        return assignmentDTOS;
+    }
+
+
 }

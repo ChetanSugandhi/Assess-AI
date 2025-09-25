@@ -1,5 +1,6 @@
 package com.AssessAI.AssessAI.controllers;
 
+import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
 import com.AssessAI.AssessAI.service.ClassroomService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,31 @@ public class ClasssroomController {
     public ResponseEntity<List<ClassroomDTO>> getAllClassroomOfStudent(@PathVariable Long studentId) {
         List<ClassroomDTO> classroomDTOS = classroomService.getAllClassroomsOfStudentByStudentId(studentId);
         return new ResponseEntity<List<ClassroomDTO>>(classroomDTOS, HttpStatus.FOUND);
+    }
+
+
+    // join classroom with classroom code
+    @PostMapping("/{classroomCode}/student/join")
+    public ResponseEntity<String> joinClassroomByClassroomCode(@PathVariable String classroomCode) {
+        String result = classroomService.joinClassroomByClassroomCode(classroomCode);
+        return new ResponseEntity<String>(result, HttpStatus.OK);
+    }
+
+
+    // remove student from classroom
+    @DeleteMapping("/{classroomId}/student/{studentId}/remove")
+    public ResponseEntity<String> removeStudentFromClassroom(@PathVariable Long classroomId,
+                                                             @PathVariable Long studentId) {
+        String result = classroomService.removeStudentFromClassroom(classroomId, studentId);
+        return new ResponseEntity<String>(result, HttpStatus.OK);
+    }
+
+
+    // fetch the all assignments of a classroom with classroom code
+    @GetMapping("/{classroomCode}/assignment")
+    public ResponseEntity<List<AssignmentDTO>> getAllAssignmentOfClassroom(@PathVariable String classroomCode) {
+        List<AssignmentDTO> assignmentDTOS = classroomService.getAllAssignmentOfClassroom(classroomCode);
+        return new ResponseEntity<List<AssignmentDTO>>(assignmentDTOS, HttpStatus.OK);
     }
 
 }
