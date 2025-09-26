@@ -1,5 +1,7 @@
 package com.AssessAI.AssessAI.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,11 +23,14 @@ public class Assessment {
 
     @ManyToOne
     @JoinColumn(name = "classroom_id")
+    @JsonBackReference
     private Classroom classroom;
 
     @OneToOne(mappedBy = "assessment")
+    @JsonBackReference
     private Test test;
 
     @OneToMany(mappedBy = "assessment")
+    @JsonManagedReference
     private Set<Result> results = new HashSet<>();
 }

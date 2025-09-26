@@ -1,5 +1,6 @@
 package com.AssessAI.AssessAI.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,5 +20,6 @@ public class MCQ {
 
     @OneToOne
     @JoinColumn(name = "question_id")
+    @JsonBackReference
     private Question question;
 }

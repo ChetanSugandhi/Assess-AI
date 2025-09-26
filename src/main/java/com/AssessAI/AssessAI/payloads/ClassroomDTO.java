@@ -22,5 +22,4 @@ public class ClassroomDTO {
     private Set<StudentDTO> students = new HashSet<>();
     private Set<AssignmentDTO> assignments = new HashSet<>();
     private Set<AssessmentDTO> assessments = new HashSet<>();
-
 }

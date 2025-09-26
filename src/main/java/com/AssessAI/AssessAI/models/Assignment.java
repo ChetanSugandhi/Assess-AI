@@ -1,5 +1,7 @@
 package com.AssessAI.AssessAI.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,11 +24,14 @@ public class Assignment {
 
     @ManyToOne
     @JoinColumn(name = "classroom_id")
+    @JsonBackReference
     private Classroom classroom;
 
     @OneToOne(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Test test;
 
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Set<Result> results = new HashSet<>();
 }

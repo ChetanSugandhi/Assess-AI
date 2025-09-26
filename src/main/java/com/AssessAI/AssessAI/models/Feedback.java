@@ -1,5 +1,6 @@
 package com.AssessAI.AssessAI.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,13 +21,16 @@ public class Feedback {
 
     @ManyToOne
     @JoinColumn(name = "student_id")
+    @JsonBackReference
     private Student student;
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")
+    @JsonBackReference
     private Teacher teacher;
 
     @ManyToOne
     @JoinColumn(name = "classroom_id")
+    @JsonBackReference
     private Classroom classroom;
 }

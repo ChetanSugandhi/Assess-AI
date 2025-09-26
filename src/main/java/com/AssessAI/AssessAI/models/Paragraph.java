@@ -1,5 +1,6 @@
 package com.AssessAI.AssessAI.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,5 +16,6 @@ public class Paragraph {
 
     @OneToOne
     @JoinColumn(name = "question_id")
+    @JsonBackReference
     private Question question;
 }

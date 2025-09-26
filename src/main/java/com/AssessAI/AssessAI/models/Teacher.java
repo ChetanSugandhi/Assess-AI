@@ -1,5 +1,6 @@
 package com.AssessAI.AssessAI.models;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,8 +26,10 @@ public class Teacher {
     private User user;
 
     @OneToMany(mappedBy = "teacher")
+    @JsonManagedReference
     private Set<Classroom> classrooms = new HashSet<>();
 
     @OneToMany(mappedBy = "teacher")
+    @JsonManagedReference
     private Set<Feedback> feedbacks = new HashSet<>();
 }
