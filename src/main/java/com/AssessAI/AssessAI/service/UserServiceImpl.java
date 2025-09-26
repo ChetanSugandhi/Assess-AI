@@ -1,6 +1,10 @@
 package com.AssessAI.AssessAI.service;
 
+import com.AssessAI.AssessAI.models.Role;
+import com.AssessAI.AssessAI.models.Student;
+import com.AssessAI.AssessAI.models.Teacher;
 import com.AssessAI.AssessAI.models.User;
+import com.AssessAI.AssessAI.payloads.UserDTO;
 import com.AssessAI.AssessAI.repository.UserRepository;
 import com.AssessAI.AssessAI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +20,19 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Override
-    public User saveUser(User user) {
-        return userRepository.save(user);
+    public User saveUser(UserDTO user) {
+        User savedUser= new User(user.getUsername(),user.getEmail(),user.getPassword(),user.getRole());
+        if(user.getRole().equals(Role.ROLE_STUDENT)) {
+            Student student = new Student();
+            student.setFullName(user.getFullName());
+            savedUser.setStudent(student);
+        }
+        else {
+            Teacher teacher = new Teacher();
+            teacher.setFullName(user.getFullName());
+            savedUser.setTeacher(teacher);
+        }
+        return userRepository.save(savedUser);
     }
 
     @Override

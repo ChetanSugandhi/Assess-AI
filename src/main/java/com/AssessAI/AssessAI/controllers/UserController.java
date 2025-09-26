@@ -1,6 +1,7 @@
 package com.AssessAI.AssessAI.controllers;
 
 import com.AssessAI.AssessAI.models.User;
+import com.AssessAI.AssessAI.payloads.UserDTO;
 import com.AssessAI.AssessAI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class UserController {
 
     // Create new user
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@RequestBody UserDTO user) {
         User savedUser = userService.saveUser(user);
         return ResponseEntity.ok(savedUser);
     }

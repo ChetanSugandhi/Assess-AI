@@ -193,22 +193,22 @@ public class ClassroomServiceImpl implements ClassroomService {
     // join classroom with classroom code....
     @Override
     public String joinClassroomByClassroomCode(String classroomCode) {
-        Student currLoggedInStudent = authUtil.getLoggedInUser();
-
-        Classroom fetchClassroom = classroomRepository.findByClassroomCode(classroomCode)
-                .orElseThrow(() -> new RuntimeException("Classroom with classroom code : " + classroomCode + " not found..!!"));
-
-        if(fetchClassroom.getStudents().contains(currLoggedInStudent)) {
-            return "You are already in this classroom..!!";
-        }
-
-        fetchClassroom.getStudents().add(currLoggedInStudent);
-        currLoggedInStudent.getClassrooms().add(fetchClassroom);
-
-        classroomRepository.save(fetchClassroom);
-        studentRepository.save(currLoggedInStudent);
-
-        return "Successfully joined classroom with code: " + classroomCode;
+////        Student currLoggedInStudent = authUtil.getLoggedInUser();
+//
+//        Classroom fetchClassroom = classroomRepository.findByClassroomCode(classroomCode)
+//                .orElseThrow(() -> new RuntimeException("Classroom with classroom code : " + classroomCode + " not found..!!"));
+//
+//        if(fetchClassroom.getStudents().contains(currLoggedInStudent)) {
+//            return "You are already in this classroom..!!";
+//        }
+//
+//        fetchClassroom.getStudents().add(currLoggedInStudent);
+//        currLoggedInStudent.getClassrooms().add(fetchClassroom);
+//
+//        classroomRepository.save(fetchClassroom);
+//        studentRepository.save(currLoggedInStudent);
+//
+//        return "Successfully joined classroom with code: " + classroomCode;
 
         return "";
     }

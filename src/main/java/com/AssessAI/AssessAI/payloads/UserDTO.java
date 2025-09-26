@@ -12,6 +12,7 @@ public class UserDTO {
 
     private Long id;          // same as entity's id
     private String username;
+    private String fullName;
     private String email;
     private String password;
     private Role role;
