@@ -25,11 +25,15 @@ public class UserServiceImpl implements UserService {
         if(user.getRole().equals(Role.ROLE_STUDENT)) {
             Student student = new Student();
             student.setFullName(user.getFullName());
+            // set both sides to persist the FK on owning side (Student.user)
+            student.setUser(savedUser);
             savedUser.setStudent(student);
         }
         else {
             Teacher teacher = new Teacher();
             teacher.setFullName(user.getFullName());
+            // set both sides to persist the FK on owning side (Teacher.user)
+            teacher.setUser(savedUser);
             savedUser.setTeacher(teacher);
         }
         return userRepository.save(savedUser);

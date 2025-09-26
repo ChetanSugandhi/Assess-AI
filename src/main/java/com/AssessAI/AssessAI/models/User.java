@@ -1,5 +1,6 @@
 package com.AssessAI.AssessAI.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,9 +28,11 @@ public class User {
 
     // Relations with Student / Teacher can be mapped
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Student student;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Teacher teacher;
 
     public User(String username, String email, String password, Role role) {
