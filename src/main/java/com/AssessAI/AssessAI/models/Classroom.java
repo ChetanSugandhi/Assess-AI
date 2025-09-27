@@ -22,6 +22,7 @@ public class Classroom {
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")
+    @JsonBackReference
     private Teacher teacher;
 
     @ManyToMany

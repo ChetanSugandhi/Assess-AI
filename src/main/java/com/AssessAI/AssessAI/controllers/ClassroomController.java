@@ -1,5 +1,6 @@
 package com.AssessAI.AssessAI.controllers;
 
+import com.AssessAI.AssessAI.models.Classroom;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
 import com.AssessAI.AssessAI.service.ClassroomService;
@@ -12,16 +13,16 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/classroom")
-public class ClasssroomController {
+public class ClassroomController {
 
     @Autowired
     private ClassroomService classroomService;
 
     // create new classroom
     @PostMapping("/create")
-    public ResponseEntity<ClassroomDTO> savedClassroom(@RequestBody ClassroomDTO classroomDTO) {
-        ClassroomDTO savedClassroom = classroomService.saveClassroom(classroomDTO);
-        return new ResponseEntity<ClassroomDTO>(savedClassroom, HttpStatus.CREATED);
+    public ResponseEntity<Classroom> savedClassroom(@RequestBody ClassroomDTO classroomDTO) {
+        Classroom savedClassroom = classroomService.saveClassroom(classroomDTO);
+        return new ResponseEntity<Classroom>(savedClassroom, HttpStatus.CREATED);
     }
 
 
@@ -35,19 +36,19 @@ public class ClasssroomController {
 
 // fetch the classrooms by classroom id
     @GetMapping("/{classroomId}")
-    public ResponseEntity<ClassroomDTO> getClassroomById(@PathVariable Long classroomId) {
-        ClassroomDTO classroomDTO = classroomService.getClassroomById(classroomId);
-        return new ResponseEntity<ClassroomDTO>(classroomDTO, HttpStatus.OK);
+    public ResponseEntity<Classroom> getClassroomById(@PathVariable Long classroomId) {
+        Classroom classroomDTO = classroomService.getClassroomById(classroomId);
+        return new ResponseEntity<Classroom>(classroomDTO, HttpStatus.OK);
     }
 
 
     // update the classroom
-    @PutMapping("/update/{classroomId}")
-    public ResponseEntity<ClassroomDTO> updateClassroom(@PathVariable Long classroomId,
-                                                        @RequestBody ClassroomDTO classroomDTO) {
-        ClassroomDTO updatedClassrom = classroomService.updateClassroom(classroomId, classroomDTO);
-        return new ResponseEntity<ClassroomDTO>(updatedClassrom, HttpStatus.OK);
-    }
+//    @PutMapping("/update/{classroomId}")
+//    public ResponseEntity<ClassroomDTO> updateClassroom(@PathVariable Long classroomId,
+//                                                        @RequestBody ClassroomDTO classroomDTO) {
+//        ClassroomDTO updatedClassrom = classroomService.updateClassroom(classroomId, classroomDTO);
+//        return new ResponseEntity<ClassroomDTO>(updatedClassrom, HttpStatus.OK);
+//    }
 
 
     // delete classroom by id

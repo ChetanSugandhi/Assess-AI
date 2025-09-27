@@ -18,8 +18,6 @@ public class ClassroomDTO {
     private String classroomCode;
 
 
-    private TeacherDTO teacher;
-    private Set<StudentDTO> students = new HashSet<>();
-    private Set<AssignmentDTO> assignments = new HashSet<>();
-    private Set<AssessmentDTO> assessments = new HashSet<>();
+    private Long userId;
+
 }
