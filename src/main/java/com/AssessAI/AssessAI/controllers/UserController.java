@@ -2,27 +2,65 @@ package com.AssessAI.AssessAI.controllers;
 
 import com.AssessAI.AssessAI.models.User;
 import com.AssessAI.AssessAI.payloads.UserDTO;
+import com.AssessAI.AssessAI.repository.UserRepository;
+import com.AssessAI.AssessAI.security.JwtService;
 import com.AssessAI.AssessAI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
     private UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+
+    public UserController(UserService userService,
+                          PasswordEncoder passwordEncoder,
+                          AuthenticationManager authenticationManager,
+                          JwtService jwtService) {
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+    }
 
     // Create new user
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody UserDTO user) {
-        User savedUser = userService.saveUser(user);
-        return ResponseEntity.ok(savedUser);
+    @PostMapping("/signup")
+    public ResponseEntity<?> register(@RequestBody UserDTO user) {
+        if(userService.getUserByEmail(user.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+        if(userService.getUserByUsername(user.getUsername()).isPresent()){
+            return ResponseEntity.badRequest().body("Username already taken");
+        }
+        User savedUser= new User(user.getUsername(),user.getEmail(),passwordEncoder.encode(user.getPassword()),user.getRole());
+        userService.saveUser(user);
+        var token=jwtService.generateToken(savedUser);
+        return ResponseEntity.ok(Map.of("token",token));
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
+        var authToken = new UsernamePasswordAuthenticationToken(
+                username, password
+        );
+        authenticationManager.authenticate(authToken);
+        var loginUser = userService.getUserByUsername(username).orElseThrow();
+        var token = jwtService.generateToken(loginUser);
+        return ResponseEntity.ok(Map.of("token", token));
+    }
+
 
     // update user by id
     @PutMapping("/{id}")
