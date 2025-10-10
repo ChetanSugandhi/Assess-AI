@@ -1,12 +1,11 @@
 package com.AssessAI.AssessAI.service;
 
-import com.AssessAI.AssessAI.models.Role;
+import com.AssessAI.AssessAI.models.AppRole;
 import com.AssessAI.AssessAI.models.Student;
 import com.AssessAI.AssessAI.models.Teacher;
 import com.AssessAI.AssessAI.models.User;
 import com.AssessAI.AssessAI.payloads.UserDTO;
 import com.AssessAI.AssessAI.repository.UserRepository;
-import com.AssessAI.AssessAI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +20,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User saveUser(UserDTO user) {
-        User savedUser= new User(user.getUsername(),user.getEmail(),user.getPassword(),user.getRole());
-        if(user.getRole().equals(Role.ROLE_STUDENT)) {
+        User savedUser= new User(user.getUsername(),user.getEmail(),user.getPassword(),user.getAppRole());
+        if(user.getAppRole().equals(AppRole.ROLE_STUDENT)) {
             Student student = new Student();
             student.setFullName(user.getFullName());
             // set both sides to persist the FK on owning side (Student.user)
@@ -47,7 +46,7 @@ public class UserServiceImpl implements UserService {
             u.setUsername(user.getUsername());
             u.setEmail(user.getEmail());
             u.setPassword(user.getPassword());
-            u.setRole(user.getRole());
+            u.setAppRole(user.getAppRole());
             return userRepository.save(u);
         }
         return null; // ya exception throw karo

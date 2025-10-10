@@ -1,6 +1,6 @@
 package com.AssessAI.AssessAI.payloads;
 
-import com.AssessAI.AssessAI.models.Role;
+import com.AssessAI.AssessAI.models.AppRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +15,6 @@ public class UserDTO {
     private String fullName;
     private String email;
     private String password;
-    private Role role;
+    private AppRole appRole;
 
 }
