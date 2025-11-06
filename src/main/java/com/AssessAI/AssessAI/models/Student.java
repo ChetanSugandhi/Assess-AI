@@ -26,6 +26,7 @@ public class Student {
     private User user;
 
     @ManyToMany(mappedBy = "students")
+    @JsonBackReference
     private Set<Classroom> classrooms = new HashSet<>();
 
     @OneToMany(mappedBy = "student")

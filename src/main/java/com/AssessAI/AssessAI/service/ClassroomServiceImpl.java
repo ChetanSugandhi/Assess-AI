@@ -6,6 +6,7 @@ import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
 import com.AssessAI.AssessAI.payloads.StudentDTO;
 import com.AssessAI.AssessAI.repository.*;
+import com.AssessAI.AssessAI.utils.AuthUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,31 +37,42 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Autowired
     private AssessmentRepository assessmentRepository;
 
+    @Autowired
+    private AuthUtil authUtil;
+
     public ClassroomServiceImpl(ClassroomRepository classroomRepository) {
         this.classroomRepository = classroomRepository;
     }
 
-    // save/create classroom
     @Override
     public Classroom saveClassroom(ClassroomDTO classroomDTO) {
         Classroom classroom = new Classroom();
         classroom.setClassName(classroomDTO.getClassName());
         classroom.setSubject(classroomDTO.getSubject());
         classroom.setClassroomCode(classroomDTO.getClassroomCode());
-        Optional<User> user= userRepository.findById(classroomDTO.getUserId());
-        if(user.isPresent()) {
-            Teacher teacher = teacherRepository.findById(user.get().getTeacher().getTchrId())
-                    .orElseThrow(() -> new RuntimeException("Teacher not found with teacher Id : " + classroomDTO.getUserId()));
-            classroom.setTeacher(teacher);
-        }else{
-            throw new RuntimeException("Teacher not found with teacher Id : " + classroomDTO.getUserId());
-        }
-        // Save entity
-        Classroom savedClassroom = classroomRepository.save(classroom);
 
-        // Convert back Entity -> DTO
-        return savedClassroom;
+        // Check for userId null
+        if (classroomDTO.getUserId() == null) {
+            throw new RuntimeException("UserId is required for creating a classroom");
+        }
+
+        Optional<User> userOpt = userRepository.findById(classroomDTO.getUserId());
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (user.getTeacher() != null) {
+                Teacher teacher = teacherRepository.findById(user.getTeacher().getTchrId())
+                        .orElseThrow(() -> new RuntimeException("Teacher record not found for the user"));
+                classroom.setTeacher(teacher);
+            } else {
+                throw new RuntimeException("User is not linked to any teacher");
+            }
+        } else {
+            throw new RuntimeException("User not found with id: " + classroomDTO.getUserId());
+        }
+
+        return classroomRepository.save(classroom);
     }
+
 
     // get classroom by id
     @Override
@@ -203,24 +215,23 @@ public class ClassroomServiceImpl implements ClassroomService {
     // join classroom with classroom code....
     @Override
     public String joinClassroomByClassroomCode(String classroomCode) {
-////        Student currLoggedInStudent = authUtil.getLoggedInUser();
-//
-//        Classroom fetchClassroom = classroomRepository.findByClassroomCode(classroomCode)
-//                .orElseThrow(() -> new RuntimeException("Classroom with classroom code : " + classroomCode + " not found..!!"));
-//
-//        if(fetchClassroom.getStudents().contains(currLoggedInStudent)) {
-//            return "You are already in this classroom..!!";
-//        }
-//
-//        fetchClassroom.getStudents().add(currLoggedInStudent);
-//        currLoggedInStudent.getClassrooms().add(fetchClassroom);
-//
-//        classroomRepository.save(fetchClassroom);
-//        studentRepository.save(currLoggedInStudent);
-//
-//        return "Successfully joined classroom with code: " + classroomCode;
+        Student currLoggedInStudent = authUtil.getLoggedInStudent();
 
-        return "";
+        Classroom fetchClassroom = classroomRepository.findByClassroomCode(classroomCode)
+                .orElseThrow(() -> new RuntimeException("Classroom with classroom code : " + classroomCode + " not found..!!"));
+
+        if(fetchClassroom.getStudents().contains(currLoggedInStudent)) {
+            return "You are already in this classroom..!!";
+        }
+
+        fetchClassroom.getStudents().add(currLoggedInStudent);
+        currLoggedInStudent.getClassrooms().add(fetchClassroom);
+
+        classroomRepository.save(fetchClassroom);
+        studentRepository.save(currLoggedInStudent);
+
+        return "Successfully joined classroom with code: " + classroomCode;
+
     }
 
 

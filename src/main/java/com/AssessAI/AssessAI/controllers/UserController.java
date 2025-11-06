@@ -14,6 +14,7 @@ import com.AssessAI.AssessAI.security.response.UserInfoResponse;
 import com.AssessAI.AssessAI.security.services.UserDetailsImpl;
 import com.AssessAI.AssessAI.service.UserService;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -51,6 +52,9 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder encoder;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     // ---------------- Sign In ----------------
     @PostMapping("/signin")
@@ -132,7 +136,7 @@ public class UserController {
                 selectedRole
         );
 
-        userRepository.save(user);
+        userService.saveUser(modelMapper.map(user, UserDTO.class));
 
         return ResponseEntity.ok(new MessageResponse("User Registered Successfully!"));
     }

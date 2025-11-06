@@ -25,7 +25,7 @@ public class Classroom {
     @JsonBackReference
     private Teacher teacher;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "student_classroom",
             joinColumns = @JoinColumn(name = "classroom_id"),
