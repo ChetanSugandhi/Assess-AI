@@ -16,6 +16,7 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long qId;
 
+    @Column(columnDefinition = "TEXT")
     private String text;
     private Integer marks;
 
@@ -24,7 +25,7 @@ public class Question {
     @JsonBackReference
     private Test test;
 
-    @OneToOne(mappedBy = "question")
+    @OneToOne(mappedBy = "question", cascade = CascadeType.ALL)
     @JsonManagedReference
     private MCQ mcq;
 

@@ -33,5 +33,5 @@ public class Test {
 
 
     @OneToMany(mappedBy = "test")
-    private ArrayList<Response> responses = new ArrayList<>();
+    private Set<Response> responses = new HashSet<>();
 }
