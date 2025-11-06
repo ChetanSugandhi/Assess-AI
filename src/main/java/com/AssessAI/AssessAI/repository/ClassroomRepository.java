@@ -11,4 +11,6 @@ public interface ClassroomRepository extends JpaRepository<Classroom, Long> {
     // Agar custom queries chahiye toh yaha add kar sakte ho
 
     Optional<Classroom> findByClassroomCode(String classroomCode);
+    boolean existsByClassroomCode(String classroomCode);
+
 }

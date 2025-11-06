@@ -1,5 +1,6 @@
 package com.AssessAI.AssessAI.models;
 
+import com.AssessAI.AssessAI.payloads.AssessmentDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -38,7 +39,7 @@ public class Classroom {
     @JsonManagedReference
     private Set<Assignment> assignments = new HashSet<>();
 
-    @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "classroom", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private Set<Assessment> assessments = new HashSet<>();
+    private Assessment assessment;
 }

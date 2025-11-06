@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -32,17 +33,24 @@ public class AssignmentServiceImpl implements AssignmentService {
     // create (save) assignment
     @Override
     public AssignmentDTO saveAssignment(AssignmentDTO assignmentDTO) {
-        Assignment assignment = modelMapper.map(assignmentDTO, Assignment.class);
 
-        // check kra ki classroom hai ki nhi..
-        if (assignmentDTO.getClassroom() != null && assignmentDTO.getClassroom().getClassroomId() != null) {
-            Classroom classroom = classroomRepository.findById(assignmentDTO.getClassroom().getClassroomId())
-                    .orElseThrow(() -> new RuntimeException("Classroom not found with ID: " + assignmentDTO.getClassroom().getClassroomId()));
-            assignment.setClassroom(classroom);
+        if(!classroomRepository.existsByClassroomCode(assignmentDTO.getClassroomCode())) {
+            throw new IllegalArgumentException("Classroom with classroom code : " + assignmentDTO.getClassroomCode() + " not found..!!");
+        }
+
+        Assignment newAssignemnt = new Assignment();
+        newAssignemnt.setTitle(assignmentDTO.getTitle());
+        newAssignemnt.setDescription(assignmentDTO.getDescription());
+        newAssignemnt.setDueDate(assignmentDTO.getDueDate());
+
+        Optional<Classroom> fetchClassroom = classroomRepository.findByClassroomCode(assignmentDTO.getClassroomCode());
+        if(fetchClassroom.isPresent()) {
+            Classroom fetchClassroomConvert = fetchClassroom.get();
+            newAssignemnt.setClassroom(fetchClassroomConvert);
         }
 
 
-        Assignment saveAssignment = assignmentRepository.save(assignment);
+        Assignment saveAssignment = assignmentRepository.save(newAssignemnt);
 
         return modelMapper.map(saveAssignment, AssignmentDTO.class);
     }
@@ -56,10 +64,6 @@ public class AssignmentServiceImpl implements AssignmentService {
         return modelMapper.map(findAssignment, AssignmentDTO.class);
     }
 
-    @Override
-    public List<Assignment> getAllAssignments() {
-        return assignmentRepository.findAll();
-    }
 
     @Override
     @Transactional
@@ -76,11 +80,6 @@ public class AssignmentServiceImpl implements AssignmentService {
             assignment.setDueDate(assignmentDTO.getDueDate());
 
         // Update classroom if provided
-        if (assignmentDTO.getClassroom() != null && assignmentDTO.getClassroom().getClassroomId() != null) {
-            Classroom classroom = classroomRepository.findById(assignmentDTO.getClassroom().getClassroomId())
-                    .orElseThrow(() -> new RuntimeException("Classroom not found with ID: " + assignmentDTO.getClassroom().getClassroomId()));
-            assignment.setClassroom(classroom);
-        }
 
         Assignment updated = assignmentRepository.save(assignment);
         return modelMapper.map(updated, AssignmentDTO.class);
@@ -96,11 +95,21 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    public List<AssignmentDTO> getAllAssignmentOfClassroom(Long classroomId) {
-        Classroom classroom = classroomRepository.findById(classroomId)
-                .orElseThrow(() -> new RuntimeException("Classroom with classroom id : " + classroomId + " not found..!!"));
+    public List<AssignmentDTO> getAllAssignmentOfClassroom(String classroomCode) {
 
-        Set<Assignment> fetchAssignment = classroom.getAssignments();
+        if(!classroomRepository.existsByClassroomCode(classroomCode)) {
+            throw new IllegalArgumentException("Classroom not found with classroom code : " + classroomCode);
+        }
+
+        Optional<Classroom> fetch = classroomRepository.findByClassroomCode(classroomCode);
+        Classroom fetchClassroom = null;
+        if(fetch.isPresent()) {
+            fetchClassroom = fetch.get();
+        }
+
+
+
+        Set<Assignment> fetchAssignment = fetchClassroom.getAssignments();
         List<AssignmentDTO> assignmentDTOS = new ArrayList<>();
 
         for(Assignment eachAssignment : fetchAssignment) {

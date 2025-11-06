@@ -1,11 +1,17 @@
 package com.AssessAI.AssessAI.service;
 
 import com.AssessAI.AssessAI.models.Assessment;
+import com.AssessAI.AssessAI.models.Classroom;
+import com.AssessAI.AssessAI.payloads.AssessmentDTO;
 import com.AssessAI.AssessAI.repository.AssessmentRepository;
+import com.AssessAI.AssessAI.repository.ClassroomRepository;
 import com.AssessAI.AssessAI.service.AssessmentService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,39 +25,55 @@ public class AssessmentServiceImpl implements AssessmentService {
         this.assessmentRepository = assessmentRepository;
     }
 
+    @Autowired
+    private ClassroomRepository classroomRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Override
-    public Assessment saveAssessment(Assessment assessment) {
-        return assessmentRepository.save(assessment);
+    public AssessmentDTO saveAssessment(AssessmentDTO assessmentDTO) {
+
+        if(!classroomRepository.existsByClassroomCode(assessmentDTO.getClassroomCode())) {
+            throw new IllegalArgumentException("Classroom not found with classroom code : " + assessmentDTO.getClassroomCode());
+        }
+
+        Assessment assessment = new Assessment();
+        assessment.setVideoLink(assessmentDTO.getVideoLink());
+        assessment.setVideoDescription(assessmentDTO.getVideoDescription());
+        assessment.setAudioLink(assessmentDTO.getAudioLink());
+        assessment.setAudioDescription(assessmentDTO.getAudioDescription());
+        assessment.setTextLink(assessmentDTO.getTextLink());
+        assessment.setTextDescription(assessmentDTO.getTextDescription());
+
+        Classroom fetchClassroom = classroomRepository.findByClassroomCode(assessmentDTO.getClassroomCode()).get();
+        assessment.setClassroom(fetchClassroom);
+
+        Assessment savedAssessment = assessmentRepository.save(assessment);
+        return modelMapper.map(savedAssessment, AssessmentDTO.class);
     }
 
     @Override
-    public Optional<Assessment> getAssessmentById(Long id) {
-        return assessmentRepository.findById(id);
+    public AssessmentDTO getAssessmentOfClass(String classroomCode) {
+        if(!classroomRepository.existsByClassroomCode(classroomCode)) {
+            throw new IllegalArgumentException("Classroom not found with classroom code : " + classroomCode);
+        }
+
+        Classroom fetchClassroom = classroomRepository.findByClassroomCode(classroomCode).get();
+
+        Assessment fetchAssessment = fetchClassroom.getAssessment();
+
+        return modelMapper.map(fetchAssessment, AssessmentDTO.class);
     }
 
     @Override
-    public List<Assessment> getAllAssessments() {
-        return assessmentRepository.findAll();
-    }
-
-    @Override
-    public Assessment updateAssessment(Long id, Assessment updatedAssessment) {
-        return assessmentRepository.findById(id)
-                .map(existing -> {
-                    existing.setName(updatedAssessment.getName());
-                    existing.setDescription(updatedAssessment.getDescription());
-                    existing.setDate(updatedAssessment.getDate());
-                    existing.setClassroom(updatedAssessment.getClassroom());
-                    return assessmentRepository.save(existing);
-                })
-                .orElseThrow(() -> new RuntimeException("Assessment not found with id " + id));
-    }
-
-    @Override
-    public void deleteAssessment(Long id) {
+    @Transactional
+    public String deleteAssessment(Long id) {
         if (!assessmentRepository.existsById(id)) {
-            throw new RuntimeException("Assessment not found with id " + id);
+            throw new IllegalArgumentException("Assessment not found with id " + id);
         }
         assessmentRepository.deleteById(id);
+        return "Successfully delete Assessment.";
     }
+
 }

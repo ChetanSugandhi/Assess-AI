@@ -29,9 +29,4 @@ public class Result {
     @JoinColumn(name = "assignment_id")
     @JsonBackReference
     private Assignment assignment;
-
-    @ManyToOne
-    @JoinColumn(name = "assessment_id")
-    @JsonBackReference
-    private Assessment assessment;
 }

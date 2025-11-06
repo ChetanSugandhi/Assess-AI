@@ -48,9 +48,9 @@ public class AssignmentController {
     }
 
     // get all assignments of a specific classroom
-    @GetMapping("/classroom/{classroomId}")
-    public ResponseEntity<List<AssignmentDTO>> allAssignments(@PathVariable Long classroomId) {
-        List<AssignmentDTO> allAssignments = assignmentService.getAllAssignmentOfClassroom(classroomId);
+    @GetMapping("/classroom/{classroomCode}")
+    public ResponseEntity<List<AssignmentDTO>> allAssignments(@PathVariable String classroomCode) {
+        List<AssignmentDTO> allAssignments = assignmentService.getAllAssignmentOfClassroom(classroomCode);
         return new ResponseEntity<List<AssignmentDTO>>(allAssignments, HttpStatus.OK);
     }
 }

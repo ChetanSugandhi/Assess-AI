@@ -24,7 +24,7 @@ public class Test {
     @JoinColumn(name = "assignment_id")
     private Assignment assignment;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "assessment_id")
     private Assessment assessment;
 

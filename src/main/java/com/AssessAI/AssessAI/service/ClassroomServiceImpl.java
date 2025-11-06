@@ -49,6 +49,11 @@ public class ClassroomServiceImpl implements ClassroomService {
         Classroom classroom = new Classroom();
         classroom.setClassName(classroomDTO.getClassName());
         classroom.setSubject(classroomDTO.getSubject());
+
+        if(classroomRepository.existsByClassroomCode(classroomDTO.getClassroomCode())) {
+            throw new IllegalArgumentException("Classroom code already exists");
+        }
+
         classroom.setClassroomCode(classroomDTO.getClassroomCode());
 
         // Check for userId null
