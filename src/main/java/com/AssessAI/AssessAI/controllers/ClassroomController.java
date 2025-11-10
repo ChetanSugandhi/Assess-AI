@@ -1,27 +1,39 @@
 package com.AssessAI.AssessAI.controllers;
 
 import com.AssessAI.AssessAI.models.Classroom;
+import com.AssessAI.AssessAI.models.User;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
 import com.AssessAI.AssessAI.service.ClassroomService;
+import com.AssessAI.AssessAI.utils.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/classroom")
+@PreAuthorize("hasRole('ROLE_TEACHER')")
 public class ClassroomController {
 
     @Autowired
     private ClassroomService classroomService;
 
+    @Autowired
+    private AuthUtil authUtil;
+
+
     // create new classroom
     @PostMapping("/create")
     public ResponseEntity<Classroom> savedClassroom(@RequestBody ClassroomDTO classroomDTO) {
-        Classroom savedClassroom = classroomService.saveClassroom(classroomDTO);
+        User user = authUtil.loggedInUser();
+
+        Classroom savedClassroom = classroomService.saveClassroom(user.getId(), classroomDTO);
         return new ResponseEntity<Classroom>(savedClassroom, HttpStatus.CREATED);
     }
 

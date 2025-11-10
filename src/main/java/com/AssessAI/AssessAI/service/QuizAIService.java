@@ -60,19 +60,23 @@ public class QuizAIService {
             Question question = new Question();
             question.setTest(test);
             question.setText((String) item.get("question"));
-            questionRepo.save(question);
 
             String type = (String) item.get("type");
-            if ("multiple-choice".equals(type)) {
+            question = questionRepo.save(question);
+
+            if ("mcq".equals(type)) {
                 MCQ mcq = new MCQ();
-                Map<String, String> options = (Map<String, String>) item.get("options");
-                mcq.setOptionA(options.get("A"));
-                mcq.setOptionB(options.get("B"));
-                mcq.setOptionC(options.get("C"));
-                mcq.setOptionD(options.get("D"));
-                mcq.setCorrectAnswer((String) item.get("correct_answer"));
+                Map<String, String> optionsMap = (Map<String, String>) item.get("options");
+                mcq.setOptionA(optionsMap.get("A"));
+                mcq.setOptionB(optionsMap.get("B"));
+                mcq.setOptionC(optionsMap.get("C"));
+                mcq.setOptionD(optionsMap.get("D"));
+                mcq.setCorrectAnswer((String) item.get("correctAnswer"));
+
                 mcq.setQuestion(question);
+
                 mcqRepo.save(mcq);
+
                 question.setMcq(mcq);
                 questionRepo.save(question);
             } else if ("paragraph".equals(type)) {
@@ -80,9 +84,11 @@ public class QuizAIService {
                 para.setPassage("Write answer here.");
                 para.setQuestion(question);
                 paraRepo.save(para);
+
                 question.setPara(para);
                 questionRepo.save(question);
             }
+
         }
 
         return aiText;

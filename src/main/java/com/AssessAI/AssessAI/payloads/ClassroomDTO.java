@@ -21,8 +21,4 @@ public class ClassroomDTO {
     private String className;
     private String subject;
     private String classroomCode;
-
-
-    private Long userId;
-
 }

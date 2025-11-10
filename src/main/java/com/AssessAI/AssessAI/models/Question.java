@@ -29,7 +29,7 @@ public class Question {
     @JsonManagedReference
     private MCQ mcq;
 
-    @OneToOne(mappedBy = "question")
+    @OneToOne(mappedBy = "question", cascade = CascadeType.ALL)
     @JsonManagedReference
     private Paragraph para;
 

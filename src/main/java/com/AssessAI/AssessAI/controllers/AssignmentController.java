@@ -3,6 +3,7 @@ package com.AssessAI.AssessAI.controllers;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
 import com.AssessAI.AssessAI.service.AssignmentService;
+import com.AssessAI.AssessAI.service.QuizAIService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,12 +19,30 @@ public class AssignmentController {
     @Autowired
     private AssignmentService assignmentService;
 
+    @Autowired
+    private QuizAIService quizAIService;
+
     // create assignment
     @PostMapping("/create")
-    public ResponseEntity<AssignmentDTO> createAssignment(@RequestBody AssignmentDTO assignmentDTO) {
-        AssignmentDTO savedAssignment = assignmentService.saveAssignment(assignmentDTO);
-        return new ResponseEntity<AssignmentDTO>(savedAssignment, HttpStatus.CREATED);
+    public ResponseEntity<String> createAssignment(@RequestBody AssignmentDTO assignmentDTO) {
+        try {
+            assignmentService.saveAssignment(assignmentDTO);  // बस assignment save करें
+            // Quiz generate करें और JSON वापस भेजें
+            String quizJson = quizAIService.generateAndReturnQuizJson(
+                    assignmentDTO.getTitle(),
+                    assignmentDTO.getDescription(),
+                    assignmentDTO.getDifficulty(),
+                    assignmentDTO.getNumMcqs(),
+                    assignmentDTO.getNumWriting()
+            );
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/json")
+                    .body(quizJson);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
     }
+
 
     // get assignment by id
     @GetMapping("/{assignmentId}")

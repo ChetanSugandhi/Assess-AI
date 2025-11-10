@@ -7,7 +7,7 @@ import com.AssessAI.AssessAI.payloads.ClassroomDTO;
 import java.util.List;
 
 public interface ClassroomService {
-    Classroom saveClassroom(ClassroomDTO classroom);
+    Classroom saveClassroom(Long id, ClassroomDTO classroom);
     Classroom getClassroomById(Long id);
     List<ClassroomDTO> getAllClassrooms();
 //    ClassroomDTO updateClassroom(Long id, ClassroomDTO updatedClassroomDTO);

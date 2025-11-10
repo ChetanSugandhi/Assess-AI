@@ -41,7 +41,6 @@ public class AssignmentServiceImpl implements AssignmentService {
         Assignment newAssignemnt = new Assignment();
         newAssignemnt.setTitle(assignmentDTO.getTitle());
         newAssignemnt.setDescription(assignmentDTO.getDescription());
-        newAssignemnt.setDueDate(assignmentDTO.getDueDate());
 
         Optional<Classroom> fetchClassroom = classroomRepository.findByClassroomCode(assignmentDTO.getClassroomCode());
         if(fetchClassroom.isPresent()) {
@@ -76,8 +75,6 @@ public class AssignmentServiceImpl implements AssignmentService {
             assignment.setTitle(assignmentDTO.getTitle());
         if (assignmentDTO.getDescription() != null)
             assignment.setDescription(assignmentDTO.getDescription());
-        if (assignmentDTO.getDueDate() != null)
-            assignment.setDueDate(assignmentDTO.getDueDate());
 
         // Update classroom if provided
 

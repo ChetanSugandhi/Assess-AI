@@ -20,8 +20,11 @@ public class AssignmentDTO {
 
     private String title;
     private String description;
-    private LocalDate dueDate;
 
     private String classroomCode;
+
+    private String difficulty;
+    private int numMcqs;
+    private int numWriting;
 
 }

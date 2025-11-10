@@ -45,7 +45,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     }
 
     @Override
-    public Classroom saveClassroom(ClassroomDTO classroomDTO) {
+    public Classroom saveClassroom(Long id, ClassroomDTO classroomDTO) {
         Classroom classroom = new Classroom();
         classroom.setClassName(classroomDTO.getClassName());
         classroom.setSubject(classroomDTO.getSubject());
@@ -57,11 +57,11 @@ public class ClassroomServiceImpl implements ClassroomService {
         classroom.setClassroomCode(classroomDTO.getClassroomCode());
 
         // Check for userId null
-        if (classroomDTO.getUserId() == null) {
+        if (id == null) {
             throw new RuntimeException("UserId is required for creating a classroom");
         }
 
-        Optional<User> userOpt = userRepository.findById(classroomDTO.getUserId());
+        Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (user.getTeacher() != null) {
@@ -72,7 +72,7 @@ public class ClassroomServiceImpl implements ClassroomService {
                 throw new RuntimeException("User is not linked to any teacher");
             }
         } else {
-            throw new RuntimeException("User not found with id: " + classroomDTO.getUserId());
+            throw new RuntimeException("User not found with id: " + id);
         }
 
         return classroomRepository.save(classroom);
