@@ -25,7 +25,7 @@ public class Question {
     @JsonBackReference
     private Test test;
 
-    @OneToOne(mappedBy = "question", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private MCQ mcq;
 

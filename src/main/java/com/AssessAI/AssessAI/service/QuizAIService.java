@@ -61,33 +61,34 @@ public class QuizAIService {
             question.setTest(test);
             question.setText((String) item.get("question"));
 
-            String type = (String) item.get("type");
+            String rawType = (String) item.get("type");
+            String type = rawType.toLowerCase();
             question = questionRepo.save(question);
 
-            if ("mcq".equals(type)) {
+            if (type.contains("mcq") || type.contains("multiple")) {
                 MCQ mcq = new MCQ();
                 Map<String, String> optionsMap = (Map<String, String>) item.get("options");
                 mcq.setOptionA(optionsMap.get("A"));
                 mcq.setOptionB(optionsMap.get("B"));
                 mcq.setOptionC(optionsMap.get("C"));
                 mcq.setOptionD(optionsMap.get("D"));
-                mcq.setCorrectAnswer((String) item.get("correctAnswer"));
+                mcq.setCorrectAnswer((String) item.get("correct_answer"));
 
                 mcq.setQuestion(question);
 
-                mcqRepo.save(mcq);
+//                mcqRepo.save(mcq);
 
                 question.setMcq(mcq);
-                questionRepo.save(question);
-            } else if ("paragraph".equals(type)) {
+            } else if (type.contains("paragraph") || type.contains("paragraph-based")) {
                 Paragraph para = new Paragraph();
                 para.setPassage("Write answer here.");
                 para.setQuestion(question);
                 paraRepo.save(para);
 
                 question.setPara(para);
-                questionRepo.save(question);
+//                questionRepo.save(question);
             }
+                questionRepo.save(question);
 
         }
 
