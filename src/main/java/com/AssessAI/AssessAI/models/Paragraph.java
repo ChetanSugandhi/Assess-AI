@@ -12,6 +12,7 @@ public class Paragraph {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long paraId;
 
+    @Column(columnDefinition = "TEXT")
     private String passage;
 
     @OneToOne

@@ -12,8 +12,12 @@ public class Result {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long resId;
 
-    private Integer marksObtained;
-    private String grade;
+//    private Integer marksObtained;
+//    private String grade;
+//    private Long studentId;
+    private Long testId;
+    private Integer totalScore;
+    private Integer maxScore;
 
     @ManyToOne
     @JoinColumn(name = "student_id")

@@ -31,6 +31,10 @@ public class AuthUtil {
         return loggedInUser().getId();
     }
 
+    public Long loggedInStudentId() {
+        return loggedInUser().getStudent().getStId();
+    }
+
     public boolean isTeacher() {
         return loggedInUser().getAppRole() == AppRole.ROLE_TEACHER;
     }

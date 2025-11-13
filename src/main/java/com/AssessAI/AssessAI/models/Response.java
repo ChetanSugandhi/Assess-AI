@@ -14,7 +14,13 @@ public class Response {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long respId;
 
+    @Column(columnDefinition = "TEXT")
     private String answer;
+    private Boolean isCorrect;
+    private Integer paragraphScore;
+
+    @Column(columnDefinition = "TEXT")
+    private String paragraphEvaluation;
     private LocalDateTime submittedAt;
 
     @ManyToOne
