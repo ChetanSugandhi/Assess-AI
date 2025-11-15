@@ -37,4 +37,10 @@ public class Response {
     @JoinColumn(name = "question_id")
     @JsonBackReference
     private Question question;
+
+    @ManyToOne
+    @JoinColumn(name = "assignment_id")
+    @JsonBackReference
+    private Assignment assignment;
+
 }

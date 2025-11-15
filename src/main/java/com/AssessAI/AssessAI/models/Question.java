@@ -36,4 +36,10 @@ public class Question {
     @OneToMany(mappedBy = "question")
     @JsonManagedReference
     private Set<Response> responses = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "assignment_id")
+    @JsonBackReference
+    private Assignment assignment;
+
 }

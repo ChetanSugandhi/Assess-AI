@@ -1,9 +1,11 @@
 package com.AssessAI.AssessAI.controllers;
 
+import com.AssessAI.AssessAI.models.Assignment;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
 import com.AssessAI.AssessAI.service.AssignmentService;
 import com.AssessAI.AssessAI.service.QuizAIService;
+import com.AssessAI.AssessAI.utils.AuthUtil;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,16 +24,21 @@ public class AssignmentController {
     @Autowired
     private QuizAIService quizAIService;
 
+    @Autowired
+    private AuthUtil authUtil;
+
     // create assignment
     @PostMapping("/create")
     public ResponseEntity<String> createAssignment(@RequestBody AssignmentDTO assignmentDTO) {
         try {
-            assignmentService.saveAssignment(assignmentDTO);  // बस assignment save करें
+            Long savedAssignmentId = assignmentService.saveAssignment(assignmentDTO);
             // Quiz generate करें और JSON वापस भेजें
             String quizJson = quizAIService.generateAndReturnQuizJson(
                     assignmentDTO.getTitle(),
                     assignmentDTO.getDescription(),
                     assignmentDTO.getDifficulty(),
+                    assignmentDTO.getClassroomCode(),
+                    savedAssignmentId,
                     assignmentDTO.getNumMcqs(),
                     assignmentDTO.getNumWriting()
             );
@@ -71,5 +78,13 @@ public class AssignmentController {
     public ResponseEntity<List<AssignmentDTO>> allAssignments(@PathVariable String classroomCode) {
         List<AssignmentDTO> allAssignments = assignmentService.getAllAssignmentOfClassroom(classroomCode);
         return new ResponseEntity<List<AssignmentDTO>>(allAssignments, HttpStatus.OK);
+    }
+
+    @GetMapping("/classroom/{classroomId}/attempted-assignments")
+    public List<Assignment> getAttemptedAssignments(
+            @PathVariable Long classroomId) {
+
+        Long studentId = authUtil.loggedInStudentId();
+        return assignmentService.getAttemptedAssignments(studentId, classroomId);
     }
 }

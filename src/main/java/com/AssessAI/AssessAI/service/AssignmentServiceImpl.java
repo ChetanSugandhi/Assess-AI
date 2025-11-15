@@ -1,11 +1,13 @@
 package com.AssessAI.AssessAI.service;
 
-import com.AssessAI.AssessAI.models.Assignment;
-import com.AssessAI.AssessAI.models.Classroom;
+import com.AssessAI.AssessAI.models.*;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
+import com.AssessAI.AssessAI.payloads.QuestionAnswerDTO;
 import com.AssessAI.AssessAI.repository.AssignmentRepository;
 import com.AssessAI.AssessAI.repository.ClassroomRepository;
+import com.AssessAI.AssessAI.repository.ResponseRepository;
 import jakarta.transaction.Transactional;
+import org.checkerframework.checker.units.qual.A;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,13 +28,19 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private ResponseRepository responseRepository;
+
+    @Autowired
+    private FeedbackService feedbackService;
+
     public AssignmentServiceImpl(AssignmentRepository assignmentRepository) {
         this.assignmentRepository = assignmentRepository;
     }
 
     // create (save) assignment
     @Override
-    public AssignmentDTO saveAssignment(AssignmentDTO assignmentDTO) {
+    public Long saveAssignment(AssignmentDTO assignmentDTO) {
 
         if(!classroomRepository.existsByClassroomCode(assignmentDTO.getClassroomCode())) {
             throw new IllegalArgumentException("Classroom with classroom code : " + assignmentDTO.getClassroomCode() + " not found..!!");
@@ -51,7 +59,13 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         Assignment saveAssignment = assignmentRepository.save(newAssignemnt);
 
-        return modelMapper.map(saveAssignment, AssignmentDTO.class);
+        if(saveAssignment.getAsgnId() != null) {
+            return saveAssignment.getAsgnId();
+        }
+
+        return (long) -1;
+
+//        return modelMapper.map(saveAssignment, AssignmentDTO.class);
     }
 
     @Override
@@ -115,6 +129,64 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
 
         return assignmentDTOS;
+    }
+
+    @Override
+    public List<Assignment> getAttemptedAssignments(Long studentId, Long classroomId) {
+        return responseRepository.findAttemptedAssignmentsInClassroom(studentId, classroomId);
+    }
+
+
+    @Override
+    public String getAttemptedAssignmentsQuestionAnswers(Long studentId, Long classroomId) throws Exception {
+
+        List<Assignment> assignments =
+                responseRepository.findAttemptedAssignmentsInClassroom(studentId, classroomId);
+
+        List<QuestionAnswerDTO> result = new ArrayList<>();
+
+        for (Assignment assignment : assignments) {
+
+            // Fetch ONLY this student's responses for THIS assignment
+            List<Response> responses =
+                    responseRepository.findResponsesForAssignment(studentId, assignment.getAsgnId());
+
+            for (Response r : responses) {
+
+                Question q = r.getQuestion();
+                QuestionAnswerDTO dto = new QuestionAnswerDTO();
+
+                dto.setQuestion(q.getText());
+
+                // MCQ handling
+                if (q.getMcq() != null) {
+
+                    String opt = r.getAnswer();
+                    MCQ mcq = q.getMcq();
+
+                    String ans = switch (opt.toUpperCase()) {
+                        case "A" -> mcq.getOptionA();
+                        case "B" -> mcq.getOptionB();
+                        case "C" -> mcq.getOptionC();
+                        case "D" -> mcq.getOptionD();
+                        default -> opt;
+                    };
+
+                    dto.setAnswer(ans);
+                }
+
+                // Paragraph
+                else {
+                    dto.setAnswer(r.getAnswer());
+                }
+
+                result.add(dto);
+            }
+        }
+
+        String aiFeedback = feedbackService.generateFeedback(result);
+
+        return aiFeedback;
     }
 
 }

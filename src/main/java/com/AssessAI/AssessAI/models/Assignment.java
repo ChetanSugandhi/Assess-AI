@@ -1,6 +1,7 @@
 package com.AssessAI.AssessAI.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,4 +35,13 @@ public class Assignment {
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<Result> results = new HashSet<>();
+
+    @OneToMany(mappedBy = "assignment")
+    @JsonIgnore
+    private Set<Response> responses;
+
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Set<Question> questions = new HashSet<>();
+
 }

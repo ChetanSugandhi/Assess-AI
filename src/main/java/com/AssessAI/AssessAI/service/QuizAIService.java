@@ -1,13 +1,7 @@
 package com.AssessAI.AssessAI.service;
 
-import com.AssessAI.AssessAI.models.MCQ;
-import com.AssessAI.AssessAI.models.Paragraph;
-import com.AssessAI.AssessAI.models.Question;
-import com.AssessAI.AssessAI.models.Test;
-import com.AssessAI.AssessAI.repository.MCQRepository;
-import com.AssessAI.AssessAI.repository.ParagraphRepository;
-import com.AssessAI.AssessAI.repository.QuestionRepository;
-import com.AssessAI.AssessAI.repository.TestRepository;
+import com.AssessAI.AssessAI.models.*;
+import com.AssessAI.AssessAI.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,8 +22,14 @@ public class QuizAIService {
     @Autowired
     private ParagraphRepository paraRepo;
 
+    @Autowired
+    private AssignmentRepository assignmentRepository;
+
+    @Autowired
+    private ClassroomRepository classroomRepository;
+
     @Transactional
-    public String generateAndReturnQuizJson(String title, String description, String difficulty, int numMcqs, int numWriting) throws Exception {
+    public String generateAndReturnQuizJson(String title, String description, String difficulty, String classroomCode, Long assignmentId, int numMcqs, int numWriting) throws Exception {
         String prompt = String.format("Generate a quiz with %d questions based on:\n"
                 + "Title: %s\nDescription: %s\nDifficulty: %s\n"
                 + "- %d multiple-choice questions (MCQs), each with:\n"
@@ -51,15 +51,22 @@ public class QuizAIService {
         ObjectMapper mapper = new ObjectMapper();
         List<Map<String, Object>> questions = mapper.readValue(aiText, List.class);
 
+        Assignment findAssignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found with id : " + assignmentId));
+
+
         // Save test
         Test test = new Test();
         test.setTestName(title);
+        test.setAssignment(findAssignment);
+
         testRepo.save(test);
 
         for (Map<String, Object> item : questions) {
             Question question = new Question();
             question.setTest(test);
             question.setText((String) item.get("question"));
+            question.setAssignment(findAssignment);
 
             String rawType = (String) item.get("type");
             String type = rawType.toLowerCase();

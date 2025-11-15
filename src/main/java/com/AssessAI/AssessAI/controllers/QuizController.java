@@ -16,10 +16,12 @@ public class QuizController {
     public ResponseEntity<String> generateAndReturnQuiz(@RequestParam String title,
                                                         @RequestParam String description,
                                                         @RequestParam String difficulty,
+                                                        @RequestParam String classroomCode,
+                                                        @RequestParam Long assignmentId,
                                                         @RequestParam int numMcqs,
                                                         @RequestParam int numWriting) {
         try {
-            String quizJson = quizAIService.generateAndReturnQuizJson(title, description, difficulty, numMcqs, numWriting);
+            String quizJson = quizAIService.generateAndReturnQuizJson(title, description, difficulty, classroomCode, assignmentId, numMcqs, numWriting);
             return ResponseEntity.ok()
                     .header("Content-Type", "application/json")
                     .body(quizJson);

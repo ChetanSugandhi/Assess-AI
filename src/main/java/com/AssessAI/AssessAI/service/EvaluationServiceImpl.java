@@ -103,6 +103,7 @@ public class EvaluationServiceImpl implements EvaluationService{
             response.setTest(test);
             response.setQuestion(q);
             response.setAnswer(studentAnswerDTO.getAnswer());
+            response.setAssignment(q.getAssignment());
 
             if(q.getMcq() != null) {
                 response.setIsCorrect(resultDTO.isCorrect());
