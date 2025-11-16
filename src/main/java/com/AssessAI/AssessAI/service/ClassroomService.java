@@ -24,5 +24,5 @@ public interface ClassroomService {
 
     String removeStudentFromClassroom(Long classroomId, Long studentId);
 
-    List<AssignmentDTO> getAllAssignmentOfClassroom(String classroomCode);
+    List<AssignmentDTO> getAllAssignmentOfClassroom(Long classroomId);
 }

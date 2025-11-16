@@ -87,7 +87,10 @@ public class ClassroomController {
     // student specific classrooms
     @GetMapping("/student/{studentId}")
     public ResponseEntity<Set<Classroom>> getAllClassroomOfStudent(@PathVariable Long studentId) {
-        Set<Classroom> classroomDTOS = classroomService.getAllClassroomsOfStudentByStudentId(studentId);
+
+        Long sid = authUtil.loggedInStudentId();
+
+        Set<Classroom> classroomDTOS = classroomService.getAllClassroomsOfStudentByStudentId(sid);
         return new ResponseEntity<Set<Classroom>>(classroomDTOS, HttpStatus.FOUND);
     }
 
@@ -110,9 +113,9 @@ public class ClassroomController {
 
 
     // fetch the all assignments of a classroom with classroom code
-    @GetMapping("/{classroomCode}/assignment")
-    public ResponseEntity<List<AssignmentDTO>> getAllAssignmentOfClassroom(@PathVariable String classroomCode) {
-        List<AssignmentDTO> assignmentDTOS = classroomService.getAllAssignmentOfClassroom(classroomCode);
+    @GetMapping("/{classroomId}/assignment")
+    public ResponseEntity<List<AssignmentDTO>> getAllAssignmentOfClassroom(@PathVariable Long classroomId) {
+        List<AssignmentDTO> assignmentDTOS = classroomService.getAllAssignmentOfClassroom(classroomId);
         return new ResponseEntity<List<AssignmentDTO>>(assignmentDTOS, HttpStatus.OK);
     }
 

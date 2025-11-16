@@ -58,16 +58,38 @@ public class EvaluationServiceImpl implements EvaluationService{
             resultDTO.setQuestionId(quesId);
             resultDTO.setQuestionText(q.getText());
 
-            if(q.getMcq() != null) {
+            if (q.getMcq() != null) {
                 resultDTO.setType("MCQ");
-                resultDTO.setStudentAnswer(studentAnswerDTO.getAnswer());
-                resultDTO.setCorrectAnswer(q.getMcq().getCorrectAnswer());
+
+                MCQ mcq = q.getMcq();
+
+                String studentText = studentAnswerDTO.getAnswer();
+                if (studentText == null) studentText = "";
+                studentText = studentText.trim();
+
+                // Get stored correct option letter (A/B/C/D)
+                String correctLetter = mcq.getCorrectAnswer();
+                if (correctLetter == null) correctLetter = "";
+
+                // Convert A/B/C/D to text
+                String correctText = switch (correctLetter.toUpperCase()) {
+                    case "A" -> mcq.getOptionA();
+                    case "B" -> mcq.getOptionB();
+                    case "C" -> mcq.getOptionC();
+                    case "D" -> mcq.getOptionD();
+                    default -> "";
+                };
+
+                resultDTO.setStudentAnswer(studentText);
+                resultDTO.setCorrectAnswer(correctText);
 
                 totalMarks++;
 
-                boolean check = q.getMcq().getCorrectAnswer().equalsIgnoreCase(studentAnswerDTO.getAnswer());
+                // Compare full text
+                boolean check = studentText.equalsIgnoreCase(correctText.trim());
                 resultDTO.setCorrect(check);
-                if(check) {
+
+                if (check) {
                     obtained++;
                 }
             }

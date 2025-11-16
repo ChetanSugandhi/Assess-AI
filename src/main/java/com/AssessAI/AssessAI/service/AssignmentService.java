@@ -2,13 +2,14 @@ package com.AssessAI.AssessAI.service;
 
 import com.AssessAI.AssessAI.models.Assignment;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
+import com.AssessAI.AssessAI.payloads.FetchQuestionsDetailsDTO;
 import com.AssessAI.AssessAI.payloads.QuestionAnswerDTO;
 
 import java.util.List;
 
 public interface AssignmentService {
     Long saveAssignment(AssignmentDTO assignment);
-    AssignmentDTO getAssignmentById(Long id);
+    FetchQuestionsDetailsDTO getAssignmentById(Long id);
     AssignmentDTO updateAssignment(Long id, AssignmentDTO updatedAssignment);
     String deleteAssignment(Long id);
 
@@ -18,4 +19,6 @@ public interface AssignmentService {
 
 
     String getAttemptedAssignmentsQuestionAnswers(Long studentId, Long classroomId) throws Exception;
+
+    Long fetchTestId(Long assignmentId);
 }

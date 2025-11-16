@@ -266,9 +266,9 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     // fetch all the assignments of the classroom by classroom code
     @Override
-    public List<AssignmentDTO> getAllAssignmentOfClassroom(String classroomCode) {
-        Classroom fetchClassroom = classroomRepository.findByClassroomCode(classroomCode)
-                .orElseThrow(() -> new RuntimeException("Classroom with classroom code not found..!!" + classroomCode));
+    public List<AssignmentDTO> getAllAssignmentOfClassroom(Long classroomId) {
+        Classroom fetchClassroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new RuntimeException("Classroom with classroom id not found..!!" + classroomId));
 
         List<AssignmentDTO> assignmentDTOS = new ArrayList<>();
         Set<Assignment> allAssignment = fetchClassroom.getAssignments();

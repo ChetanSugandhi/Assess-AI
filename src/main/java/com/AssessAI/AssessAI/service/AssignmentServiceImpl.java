@@ -1,11 +1,8 @@
 package com.AssessAI.AssessAI.service;
 
 import com.AssessAI.AssessAI.models.*;
-import com.AssessAI.AssessAI.payloads.AssignmentDTO;
-import com.AssessAI.AssessAI.payloads.QuestionAnswerDTO;
-import com.AssessAI.AssessAI.repository.AssignmentRepository;
-import com.AssessAI.AssessAI.repository.ClassroomRepository;
-import com.AssessAI.AssessAI.repository.ResponseRepository;
+import com.AssessAI.AssessAI.payloads.*;
+import com.AssessAI.AssessAI.repository.*;
 import jakarta.transaction.Transactional;
 import org.checkerframework.checker.units.qual.A;
 import org.modelmapper.ModelMapper;
@@ -33,6 +30,18 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Autowired
     private FeedbackService feedbackService;
+
+    @Autowired
+    private QuestionRepository questionRepository;
+
+    @Autowired
+    private ParagraphRepository paragraphRepository;
+
+    @Autowired
+    private MCQRepository mcqRepository;
+
+    @Autowired
+    private TestRepository testRepository;
 
     public AssignmentServiceImpl(AssignmentRepository assignmentRepository) {
         this.assignmentRepository = assignmentRepository;
@@ -69,13 +78,58 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    public AssignmentDTO getAssignmentById(Long id) {
-        Assignment findAssignment = assignmentRepository.findById(id)
+    public FetchQuestionsDetailsDTO getAssignmentById(Long id) {
+
+        Assignment assignment = assignmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Assignment not found with id : " + id));
 
+        List<Question> questions = questionRepository.findQuestionsByAssignmentId(id);
 
-        return modelMapper.map(findAssignment, AssignmentDTO.class);
+        List<QuestionDTO> questionDTOList = new ArrayList<>();
+
+        for (Question q : questions) {
+
+            QuestionDTO dto = new QuestionDTO();
+            dto.setQId(q.getQId());
+            dto.setText(q.getText());
+
+            // MCQ Case
+            if (q.getMcq() != null) {
+                dto.setType("MCQ");
+
+                MCQ mcq = q.getMcq();
+
+                MCQDTO mcqDTO = MCQDTO.builder()
+                        .option1(mcq.getOptionA())
+                        .option2(mcq.getOptionB())
+                        .option3(mcq.getOptionC())
+                        .option4(mcq.getOptionD())
+                        .build();
+
+                dto.setMcq(mcqDTO);
+            }
+
+            // Paragraph Case
+            else if (q.getPara() != null) {
+                dto.setType("PARAGRAPH");
+                dto.setMcq(null);
+            }
+
+            else {
+                dto.setType("UNKNOWN");
+            }
+
+            questionDTOList.add(dto);
+        }
+
+        // FINAL RETURN DTO
+        FetchQuestionsDetailsDTO response = new FetchQuestionsDetailsDTO();
+        response.setQuestions(questionDTOList);
+
+        return response;
     }
+
+
 
 
     @Override
@@ -187,6 +241,11 @@ public class AssignmentServiceImpl implements AssignmentService {
         String aiFeedback = feedbackService.generateFeedback(result);
 
         return aiFeedback;
+    }
+
+    @Override
+    public Long fetchTestId(Long assignmentId) {
+        return testRepository.findTestIdByAssignmentId(assignmentId);
     }
 
 }

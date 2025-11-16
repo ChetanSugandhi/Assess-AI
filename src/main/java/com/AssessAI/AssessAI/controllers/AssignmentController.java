@@ -3,6 +3,7 @@ package com.AssessAI.AssessAI.controllers;
 import com.AssessAI.AssessAI.models.Assignment;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
+import com.AssessAI.AssessAI.payloads.FetchQuestionsDetailsDTO;
 import com.AssessAI.AssessAI.service.AssignmentService;
 import com.AssessAI.AssessAI.service.QuizAIService;
 import com.AssessAI.AssessAI.utils.AuthUtil;
@@ -53,10 +54,11 @@ public class AssignmentController {
 
     // get assignment by id
     @GetMapping("/{assignmentId}")
-    public ResponseEntity<AssignmentDTO> getAssignmentById(@PathVariable Long assignmentId) {
-        AssignmentDTO assignmentDTO = assignmentService.getAssignmentById(assignmentId);
-        return new ResponseEntity<AssignmentDTO>(assignmentDTO, HttpStatus.OK);
+    public ResponseEntity<FetchQuestionsDetailsDTO> getAssignmentById(@PathVariable Long assignmentId) {
+        FetchQuestionsDetailsDTO fetchQuestionsDetailsDTO = assignmentService.getAssignmentById(assignmentId);
+        return new ResponseEntity<>(fetchQuestionsDetailsDTO, HttpStatus.OK);
     }
+
 
     // update the assignment
     @PutMapping("/update/{assignmentId}")
@@ -87,4 +89,10 @@ public class AssignmentController {
         Long studentId = authUtil.loggedInStudentId();
         return assignmentService.getAttemptedAssignments(studentId, classroomId);
     }
+
+    @GetMapping("/test/{assignmentId}")
+    public Long fetchTestId(@PathVariable Long assignmentId) {
+        return assignmentService.fetchTestId(assignmentId);
+    }
+
 }
