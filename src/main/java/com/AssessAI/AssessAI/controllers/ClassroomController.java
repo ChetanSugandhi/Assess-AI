@@ -5,6 +5,7 @@ import com.AssessAI.AssessAI.models.User;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
 import com.AssessAI.AssessAI.service.ClassroomService;
+import com.AssessAI.AssessAI.service.TeacherService;
 import com.AssessAI.AssessAI.utils.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/classroom")
-@PreAuthorize("hasRole('ROLE_TEACHER')")
 public class ClassroomController {
 
     @Autowired
@@ -26,6 +26,8 @@ public class ClassroomController {
 
     @Autowired
     private AuthUtil authUtil;
+    @Autowired
+    private TeacherService teacherService;
 
 
     // create new classroom
@@ -72,8 +74,9 @@ public class ClassroomController {
 
 
     // teacher specific classrooms
-    @GetMapping("/teacher/{teacherId}")
-    public ResponseEntity<List<ClassroomDTO>> getAllClassroomOfTeacher(@PathVariable Long teacherId) {
+    @GetMapping("/teacher/{userId}")
+    public ResponseEntity<List<ClassroomDTO>> getAllClassroomOfTeacher(@PathVariable Long userId) {
+        long teacherId= teacherService.getTeacherByUserId(userId).get().getTchrId();
         List<ClassroomDTO> classroomDTOS = classroomService.getAllClassroomsOfTeacherByTeacherId(teacherId);
         return new ResponseEntity<List<ClassroomDTO>>(classroomDTOS, HttpStatus.FOUND);
     }

@@ -10,10 +10,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-
+@Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -22,56 +23,49 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException, ServletException, IOException {
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+        System.out.println("🔥 AuthTokenFilter TRIGGERED on: " + request.getRequestURI());
+
+        String jwt = parseJwt(request);
+
+        System.out.println("🔥 Incoming JWT = " + jwt);
 
         try {
-            // Step 1: Token extract
-//            String jwt = jwtUtils.getJwtFromHeader(request);
-//            String jwt = jwtUtils.getJwtFromCookie(request);     // because we are using cookies so that we wrote these.. token ko extract kra from cookie...
-            String jwt = parseJwt(request);
-
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                // Step 2: Username extract
-                String username = jwtUtils.getUsernameFromJWTToken(jwt);
 
-                // Step 3: UserDetails load
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
-                // Step 4: Spring Security authentication set
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities());
+                System.out.println("✅ Token valid, username = " + username);
 
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                var userDetails = userDetailsService.loadUserByUsername(username);
 
-                // Step 5: Store in SecurityContext
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                var auth = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            } else {
+                System.out.println("❌ Token missing or invalid");
             }
+
         } catch (Exception e) {
-            System.out.println("Cannot set user authentication: " + e.getMessage());
+            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);
     }
 
-    // this is for swagger for authentication in swagger...
     private String parseJwt(HttpServletRequest request) {
-        String jwt = jwtUtils.getJwtFromCookie(request);
-        if(jwt != null) {
-            return jwt;
+        String header = request.getHeader("Authorization");
+        System.out.println("🔍 Authorization Header = " + header);
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
         }
-
-        String jwt2 = jwtUtils.getJwtFromHeader(request);
-        if(jwt2 != null) {
-            return jwt2;
-        }
-
         return null;
     }
 }

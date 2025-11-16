@@ -23,13 +23,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -37,28 +35,23 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private RoleRepository roleRepository;
-
     @Autowired
     private JwtUtils jwtUtils;
-
     @Autowired
     private AuthenticationManager authenticationManager;
-
     @Autowired
     private PasswordEncoder encoder;
-
     @Autowired
     private ModelMapper modelMapper;
 
     // ---------------- Sign In ----------------
     @PostMapping("/signin")
-    public ResponseEntity<?> signInUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -68,19 +61,23 @@ public class UserController {
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-            // Generate JWT token (not just cookie)
-            String jwt = jwtUtils.getTokenFromUsername(userDetails.getUsername());
+            UserDetailsImpl userDetails =
+                    (UserDetailsImpl) authentication.getPrincipal();
 
-            ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+            // Generate JWT string (not cookie only)
+            String jwt = jwtUtils.generateJwtToken(userDetails.getUsername());
 
+            // Optional Cookie for browser use
+            ResponseCookie cookie = jwtUtils.generateJwtCookie(jwt);
+
+            // Extract authorities
             List<String> roles = userDetails.getAuthorities().stream()
                     .map(item -> item.getAuthority())
                     .toList();
 
-            // Include token in response
-            UserInfoResponse userInfoResponse = new UserInfoResponse(
+            // Build final JSON response
+            UserInfoResponse response = new UserInfoResponse(
                     userDetails.getId(),
                     userDetails.getUsername(),
                     roles,
@@ -88,10 +85,10 @@ public class UserController {
             );
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                    .body(userInfoResponse);
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .body(response);
 
-        } catch (AuthenticationException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new MessageResponse("ERROR: Invalid username or password"));
         }
@@ -101,18 +98,18 @@ public class UserController {
     // ---------------- Sign Up ----------------
     @PostMapping("/signup")
     public ResponseEntity<?> signUpUser(@Valid @RequestBody SignupRequest signupRequest) {
-        // Check if username/email already exists
+
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
             return ResponseEntity.badRequest()
                     .body(new MessageResponse("ERROR: Username already exists"));
         }
+
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             return ResponseEntity.badRequest()
                     .body(new MessageResponse("ERROR: Email already exists"));
         }
 
-        // Determine role
-        final AppRole selectedRole;
+        AppRole selectedRole;
         if (signupRequest.getRole() != null) {
             try {
                 selectedRole = AppRole.valueOf(signupRequest.getRole().toUpperCase());
@@ -124,11 +121,9 @@ public class UserController {
             selectedRole = AppRole.ROLE_STUDENT; // Default
         }
 
-        // Fetch Role entity from DB or create if not exists
         Role role = roleRepository.findByRoleName(selectedRole)
                 .orElseGet(() -> roleRepository.save(new Role(selectedRole)));
 
-        // Create new User
         User user = new User(
                 signupRequest.getUsername(),
                 signupRequest.getEmail(),
@@ -155,44 +150,37 @@ public class UserController {
                 .map(item -> item.getAuthority())
                 .toList();
 
-        UserInfoResponse userInfoResponse = new UserInfoResponse(
+        return ResponseEntity.ok(new UserInfoResponse(
                 userDetails.getId(),
                 userDetails.getUsername(),
                 roles
-        );
-
-        return ResponseEntity.ok(userInfoResponse);
+        ));
     }
 
     // ---------------- Sign Out ----------------
     @PostMapping("/signout")
-    public ResponseEntity<?> signoutUser() {
-        ResponseCookie cookie = jwtUtils.clearJwtCookie();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new MessageResponse("You have been signed out!"));
+    public ResponseEntity<?> logoutUser() {
+        return ResponseEntity.ok("User logged out");
     }
 
-    // ---------------- CRUD Operations ----------------
+
+    // ---------------- CRUD ----------------
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-        return user.map(ResponseEntity::ok)
+        return userService.getUserById(id)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
         User updatedUser = userService.updateUser(id, user);
-        if (updatedUser == null) {
-            return ResponseEntity.notFound().build();
-        }
+        if (updatedUser == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(updatedUser);
     }
 
@@ -204,15 +192,15 @@ public class UserController {
 
     @GetMapping("/username/{username}")
     public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-        Optional<User> user = userService.getUserByUsername(username);
-        return user.map(ResponseEntity::ok)
+        return userService.getUserByUsername(username)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        Optional<User> user = userService.getUserByEmail(email);
-        return user.map(ResponseEntity::ok)
+        return userService.getUserByEmail(email)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
