@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/classroom")
@@ -85,9 +86,9 @@ public class ClassroomController {
 
     // student specific classrooms
     @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<ClassroomDTO>> getAllClassroomOfStudent(@PathVariable Long studentId) {
-        List<ClassroomDTO> classroomDTOS = classroomService.getAllClassroomsOfStudentByStudentId(studentId);
-        return new ResponseEntity<List<ClassroomDTO>>(classroomDTOS, HttpStatus.FOUND);
+    public ResponseEntity<Set<Classroom>> getAllClassroomOfStudent(@PathVariable Long studentId) {
+        Set<Classroom> classroomDTOS = classroomService.getAllClassroomsOfStudentByStudentId(studentId);
+        return new ResponseEntity<Set<Classroom>>(classroomDTOS, HttpStatus.FOUND);
     }
 
 

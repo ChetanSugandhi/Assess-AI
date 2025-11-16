@@ -5,6 +5,7 @@ import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ClassroomService {
     Classroom saveClassroom(Long id, ClassroomDTO classroom);
@@ -17,7 +18,7 @@ public interface ClassroomService {
     List<ClassroomDTO> getAllClassroomsOfTeacherByTeacherId(Long teacherId);
 
     // get all classrooms of a student
-    List<ClassroomDTO> getAllClassroomsOfStudentByStudentId(Long studentId);
+    Set<Classroom> getAllClassroomsOfStudentByStudentId(Long studentId);
 
     String joinClassroomByClassroomCode(String classroomCode);
 
