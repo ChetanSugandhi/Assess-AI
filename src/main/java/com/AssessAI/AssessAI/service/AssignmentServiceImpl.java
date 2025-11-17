@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +43,12 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Autowired
     private TestRepository testRepository;
+
+    @Autowired
+    private FeedbackRepository feedbackRepository;
+
+    @Autowired
+    private StudentRepository studentRepository;
 
     public AssignmentServiceImpl(AssignmentRepository assignmentRepository) {
         this.assignmentRepository = assignmentRepository;
@@ -194,14 +201,30 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     public String getAttemptedAssignmentsQuestionAnswers(Long studentId, Long classroomId) throws Exception {
 
+
+        Student student = studentRepository.findById(studentId).orElseThrow();
+        Classroom classroom = classroomRepository.findById(classroomId).orElseThrow();
+
+
+        // 1️⃣ Check if student attempted ANY assignment
         List<Assignment> assignments =
                 responseRepository.findAttemptedAssignmentsInClassroom(studentId, classroomId);
 
-        List<QuestionAnswerDTO> result = new ArrayList<>();
+        if (assignments == null || assignments.isEmpty()) {
+            return "You have not attempted any assignment in this classroom yet. "
+                    + "Attempt at least one assignment to generate feedback.";
+        }
+
+        // 2️⃣ Fetch existing feedback (if any)
+        Feedback existingFeedback =
+                feedbackRepository.findByStudent_StIdAndClassroom_cId(studentId, classroomId);
+
+        // Prepare question-answer list for AI
+        List<QuestionAnswerDTO> qaList = new ArrayList<>();
 
         for (Assignment assignment : assignments) {
 
-            // Fetch ONLY this student's responses for THIS assignment
+            // Fetch ONLY this student's responses for this assignment
             List<Response> responses =
                     responseRepository.findResponsesForAssignment(studentId, assignment.getAsgnId());
 
@@ -212,36 +235,59 @@ public class AssignmentServiceImpl implements AssignmentService {
 
                 dto.setQuestion(q.getText());
 
-                // MCQ handling
+                // 🔹 MCQ Conversion
                 if (q.getMcq() != null) {
 
-                    String opt = r.getAnswer();
+                    String ansKey = r.getAnswer();
                     MCQ mcq = q.getMcq();
 
-                    String ans = switch (opt.toUpperCase()) {
+                    String finalAnswer = switch (ansKey.toUpperCase()) {
                         case "A" -> mcq.getOptionA();
                         case "B" -> mcq.getOptionB();
                         case "C" -> mcq.getOptionC();
                         case "D" -> mcq.getOptionD();
-                        default -> opt;
+                        default -> ansKey;
                     };
 
-                    dto.setAnswer(ans);
-                }
-
-                // Paragraph
-                else {
+                    dto.setAnswer(finalAnswer);
+                } else {
                     dto.setAnswer(r.getAnswer());
                 }
 
-                result.add(dto);
+                qaList.add(dto);
             }
         }
 
-        String aiFeedback = feedbackService.generateFeedback(result);
+        // 3️⃣ Generate new feedback using AI
+        String newFeedback = feedbackService.generateFeedback(qaList);
 
-        return aiFeedback;
+        // 4️⃣ Store or update feedback in database
+        if (existingFeedback == null) {
+
+            // First time feedback generation — SAVE NEW
+            Feedback fb = new Feedback();
+            fb.setComments(newFeedback);          // AI FEEDBACK
+            fb.setFeedbackDate(LocalDateTime.now());
+            fb.setTeacherAddonData(null);
+            fb.setStudent(student);
+            fb.setTeacher(null);
+            fb.setClassroom(classroom);
+
+            feedbackRepository.save(fb);
+
+        } else {
+
+            // Update existing feedback
+            existingFeedback.setComments(newFeedback);
+            existingFeedback.setFeedbackDate(LocalDateTime.now());
+
+            feedbackRepository.save(existingFeedback);
+        }
+
+
+        return newFeedback;
     }
+
 
     @Override
     public Long fetchTestId(Long assignmentId) {

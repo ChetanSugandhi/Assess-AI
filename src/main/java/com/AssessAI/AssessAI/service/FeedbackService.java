@@ -4,6 +4,7 @@ import com.AssessAI.AssessAI.models.Feedback;
 import com.AssessAI.AssessAI.payloads.QuestionAnswerDTO;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface FeedbackService {
@@ -15,4 +16,5 @@ public interface FeedbackService {
 
     String generateFeedback(List<QuestionAnswerDTO> qaList) throws Exception;
 
+    Map<String, Object> parseFeedback(String aiText);
 }

@@ -8,9 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
@@ -69,43 +69,47 @@ public class FeedbackServiceImpl implements FeedbackService {
         String jsonInput = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(qaList);
 
         String prompt = """
-                You are an educational evaluator.
-                
-                You will receive a JSON list containing questions and the student's answers.
-                Your task is to evaluate the student's overall performance based on all answers combined.
-                
-                Do NOT evaluate answers individually.
-                Instead, provide a holistic and well-organized assessment covering:
-                - General Answer Quality
-                - Conceptual Understanding
-                - Accuracy and Knowledge Depth
-                - Writing & Grammar Skills
-                - Logical Reasoning Ability
-                - Consistency Across Answers
-                
-                ### OUTPUT FORMAT (STRICT REQUIREMENT):
-                
-                1. **OverallFeedback (minimum 150 words):**
-                   Provide a clear, structured, and readable evaluation summarizing the student's overall performance.\s
-                   Discuss clarity of thought, depth of understanding, accuracy, writing quality, strengths, weaknesses, and overall learning level.
-                   The tone must be formal, academic, and constructive.
-                
-                2. **OverallStrengths (approx. 50 words):**
-                   Provide a concise list-style summary highlighting the strongest aspects of the student’s performance.
-                
-                3. **OverallWeaknesses (approx. 50 words):**
-                   Provide a concise list-style summary of the key weaknesses and areas needing improvement.
-                
-                Ensure the overall output is:
-                - Formal and evaluator-style \s
-                - Easy to read and well-structured \s
-                - Helpful for academic development \s
-                - Based only on the combined impression of all answers, not per-question evaluation
-                
-                ### JSON Input:                
-                %s
-                
-                """.formatted(jsonInput);
+            You are an academic evaluator.
+
+            You will receive a JSON list that contains: 
+            - a set of questions 
+            - the student's answers.
+
+            Your job is to evaluate the student's *overall performance* based only on the combined impression of all answers.
+            DO NOT evaluate each question individually.
+
+            -----------------------------------------------------
+            STRICT OUTPUT FORMAT (DO NOT BREAK THIS STRUCTURE):
+            -----------------------------------------------------
+
+            1. **Key Strengths (4 bullet points only):**
+               - Highlight four major strengths observed across all answers.
+               - Keep each bullet crisp, specific, and academic in tone.
+
+            2. **Key Improvements (4 bullet points only):**
+               - Mention four areas where the student needs improvement.
+               - Make each point constructive, not harsh.
+
+            3. **Detailed Feedback (150-200 words):**
+               - Provide a holistic, academic-style feedback paragraph.
+               - Discuss clarity of thought, depth of understanding, consistency, reasoning ability, accuracy, and writing quality.
+               - Provide an expert-level, well-structured evaluation that feels like a teacher’s assessment.
+               - Avoid repeating bullet points verbatim.
+
+            -----------------------------------------------------
+            Additional Rules:
+            -----------------------------------------------------
+            - Maintain a formal, evaluator-style tone.
+            - Ensure readability and clean structure.
+            - Base the evaluation ONLY on the combined quality of all answers.
+            - DO NOT mention the JSON or reference question numbers.
+
+            -----------------------------------------------------
+            JSON Input:
+            -----------------------------------------------------
+            %s
+
+            """.formatted(jsonInput);
 
         int attempts = 0;
         Exception lastException = null;
@@ -130,4 +134,44 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         throw lastException;
     }
+
+    @Override
+    public Map<String, Object> parseFeedback(String aiText) {
+
+        Map<String, Object> map = new HashMap<>();
+
+        // Extract strengths
+        List<String> strengths = new ArrayList<>();
+        if (aiText.contains("Key Strengths")) {
+            String part = aiText.split("Key Improvements")[0];
+            String[] lines = part.split("-");
+            for (int i = 1; i < lines.length; i++) {
+                strengths.add(lines[i].trim());
+            }
+        }
+
+        // Extract improvements
+        List<String> improvements = new ArrayList<>();
+        if (aiText.contains("Key Improvements")) {
+            String part = aiText.split("Detailed Feedback")[0];
+            String[] lines = part.split("-");
+            for (int i = 1; i < lines.length; i++) {
+                improvements.add(lines[i].trim());
+            }
+        }
+
+        // Extract detailed feedback
+        String detailed = "";
+        if (aiText.contains("Detailed Feedback")) {
+            detailed = aiText.substring(aiText.indexOf("Detailed Feedback")).replace("Detailed Feedback (100–150 words):", "").trim();
+        }
+
+        map.put("strengths", strengths);
+        map.put("improvements", improvements);
+        map.put("detailedFeedback", detailed);
+
+        return map;
+    }
+
+
 }

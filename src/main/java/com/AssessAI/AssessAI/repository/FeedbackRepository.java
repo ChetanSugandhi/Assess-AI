@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
-    // Example: Optional<List<Feedback>> findByStudentId(Long studentId);
+    Feedback findByStudent_StIdAndClassroom_cId(Long studentId, Long classroomId);
+
 }
