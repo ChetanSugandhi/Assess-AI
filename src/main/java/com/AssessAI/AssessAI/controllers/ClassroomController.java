@@ -4,6 +4,7 @@ import com.AssessAI.AssessAI.models.Classroom;
 import com.AssessAI.AssessAI.models.User;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
+import com.AssessAI.AssessAI.payloads.StudentDTO;
 import com.AssessAI.AssessAI.service.ClassroomService;
 import com.AssessAI.AssessAI.service.TeacherService;
 import com.AssessAI.AssessAI.utils.AuthUtil;
@@ -118,5 +119,13 @@ public class ClassroomController {
         List<AssignmentDTO> assignmentDTOS = classroomService.getAllAssignmentOfClassroom(classroomId);
         return new ResponseEntity<List<AssignmentDTO>>(assignmentDTOS, HttpStatus.OK);
     }
+
+
+    @GetMapping("/{classroomId}/students")
+    public ResponseEntity<List<StudentDTO>> getAllStudentsOfClassroom(@PathVariable Long classroomId) {
+        List<StudentDTO> studentDTOS = classroomService.getAllStudentsOfClassroom(classroomId);
+        return new ResponseEntity<>(studentDTOS, HttpStatus.OK);
+    }
+
 
 }

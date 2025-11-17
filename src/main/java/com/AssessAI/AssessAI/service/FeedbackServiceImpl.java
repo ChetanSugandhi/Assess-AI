@@ -9,6 +9,7 @@ import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.regex.*;
 
 import java.util.*;
 
@@ -135,35 +136,46 @@ public class FeedbackServiceImpl implements FeedbackService {
         throw lastException;
     }
 
+
+    private List<String> extractBullets(String textBlock) {
+        List<String> bullets = new ArrayList<>();
+        // Match "- " followed by any text, possibly after whitespace
+        Matcher m = Pattern.compile("(?m)^\\s*[-*]\\s+(.+)$").matcher(textBlock);
+        while (m.find()) {
+            String line = m.group(1).trim();
+            // Stop if line contains section heading (e.g. 'Key Improvements')
+            if (line.toLowerCase().contains("key improvements") || line.toLowerCase().contains("detailed feedback")) {
+                break;
+            }
+            bullets.add(line);
+        }
+        return bullets;
+    }
+
     @Override
     public Map<String, Object> parseFeedback(String aiText) {
-
         Map<String, Object> map = new HashMap<>();
 
-        // Extract strengths
         List<String> strengths = new ArrayList<>();
-        if (aiText.contains("Key Strengths")) {
-            String part = aiText.split("Key Improvements")[0];
-            String[] lines = part.split("-");
-            for (int i = 1; i < lines.length; i++) {
-                strengths.add(lines[i].trim());
-            }
-        }
-
-        // Extract improvements
         List<String> improvements = new ArrayList<>();
-        if (aiText.contains("Key Improvements")) {
-            String part = aiText.split("Detailed Feedback")[0];
-            String[] lines = part.split("-");
-            for (int i = 1; i < lines.length; i++) {
-                improvements.add(lines[i].trim());
-            }
-        }
-
-        // Extract detailed feedback
         String detailed = "";
-        if (aiText.contains("Detailed Feedback")) {
-            detailed = aiText.substring(aiText.indexOf("Detailed Feedback")).replace("Detailed Feedback (100–150 words):", "").trim();
+
+        try {
+            // Use regex to precisely extract each section
+            Pattern strengthPattern = Pattern.compile("Key Strengths.*?:(.*?)(Key Improvements|$)", Pattern.DOTALL);
+            Pattern improvementPattern = Pattern.compile("Key Improvements.*?:(.*?)(Detailed Feedback|$)", Pattern.DOTALL);
+            Pattern detailedPattern = Pattern.compile("Detailed Feedback.*?:\\*\\*(.*)", Pattern.DOTALL);
+
+            Matcher sm = strengthPattern.matcher(aiText);
+            if (sm.find()) strengths = extractBullets(sm.group(1));
+
+            Matcher im = improvementPattern.matcher(aiText);
+            if (im.find()) improvements = extractBullets(im.group(1));
+
+            Matcher dm = detailedPattern.matcher(aiText);
+            if (dm.find()) detailed = dm.group(1).trim();
+        } catch (Exception e) {
+            // Log/handle parsing exception
         }
 
         map.put("strengths", strengths);
@@ -172,6 +184,5 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         return map;
     }
-
 
 }

@@ -1,10 +1,10 @@
 package com.AssessAI.AssessAI.service;
 
 import com.AssessAI.AssessAI.models.*;
-import com.AssessAI.AssessAI.payloads.AssessmentDTO;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
 import com.AssessAI.AssessAI.payloads.StudentDTO;
+import com.AssessAI.AssessAI.payloads.UserDTO;
 import com.AssessAI.AssessAI.repository.*;
 import com.AssessAI.AssessAI.utils.AuthUtil;
 import org.modelmapper.ModelMapper;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ClassroomServiceImpl implements ClassroomService {
@@ -283,6 +284,48 @@ public class ClassroomServiceImpl implements ClassroomService {
 
         return assignmentDTOS;
     }
+
+
+    @Override
+    public List<StudentDTO> getAllStudentsOfClassroom(Long classroomId) {
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new IllegalArgumentException("No classrooom found"));
+
+        Set<Student> students = classroom.getStudents();
+
+        // Convert Student entities to StudentDTOs
+        List<StudentDTO> studentDTOS = students.stream().map(student -> {
+            StudentDTO dto = new StudentDTO();
+            dto.setId(student.getStId());
+            dto.setFullName(student.getFullName());
+            dto.setEnrollmentNo(student.getEnrollmentNo());
+            dto.setContactNo(student.getContactNo());
+            dto.setAddress(student.getAddress());
+
+            // Assuming UserDTO mapping is handled, set user DTO here
+            UserDTO userDTO = mapUserToUserDTO(student.getUser());
+            dto.setUser(userDTO);
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return studentDTOS;
+    }
+
+    private UserDTO mapUserToUserDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());            // Adjust field names as per your User and UserDTO classes
+        userDTO.setUsername(user.getUsername());
+        userDTO.setEmail(user.getEmail());
+        // Map other relevant User fields to UserDTO fields here
+
+        return userDTO;
+    }
+
+
 
 
 }

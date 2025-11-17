@@ -14,9 +14,18 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long fId;
 
-    @Lob
+//    @Lob
     @Column(columnDefinition = "TEXT")
     private String comments;
+
+    @Column(columnDefinition = "TEXT")
+    private String strength;
+
+    @Column(columnDefinition = "TEXT")
+    private String improvements;
+
+    @Column(columnDefinition = "TEXT")
+    private String feedback;
 
     private LocalDateTime feedbackDate;
 

@@ -3,6 +3,7 @@ package com.AssessAI.AssessAI.service;
 import com.AssessAI.AssessAI.models.Classroom;
 import com.AssessAI.AssessAI.payloads.AssignmentDTO;
 import com.AssessAI.AssessAI.payloads.ClassroomDTO;
+import com.AssessAI.AssessAI.payloads.StudentDTO;
 
 import java.util.List;
 import java.util.Set;
@@ -25,4 +26,6 @@ public interface ClassroomService {
     String removeStudentFromClassroom(Long classroomId, Long studentId);
 
     List<AssignmentDTO> getAllAssignmentOfClassroom(Long classroomId);
+
+    List<StudentDTO> getAllStudentsOfClassroom(Long classroomId);
 }
