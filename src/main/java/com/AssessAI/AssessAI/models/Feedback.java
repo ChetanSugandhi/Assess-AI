@@ -14,7 +14,6 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long fId;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String comments;
 
